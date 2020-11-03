@@ -1,5 +1,5 @@
 
-public class Main {
+public class Grid {
     //Size of board
     private int boardSize = 10;
     private String port;
