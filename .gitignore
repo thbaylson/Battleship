@@ -4,6 +4,8 @@
 .idea/
 .vscode/
 .env/
+*.class
+*/*.class
 
 # User-specific stuff
 .idea/**/workspace.xml
