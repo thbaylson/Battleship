@@ -1,5 +1,3 @@
-package com.company;
-
 public enum Ships{
 
     Battleship('B', "Battleship", 4),
@@ -7,7 +5,6 @@ public enum Ships{
     Carrier('C', "Carrier", 5),
     Submarine('S', "Submarine", 3),
     Destroyer('D', "Destroyer", 2),
-    Empty(' ', "Empty", 1),
     Hit('X', "Hit", 1),
     Miss('M', "Miss", 1);
 

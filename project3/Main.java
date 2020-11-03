@@ -1,5 +1,3 @@
-package com.company;
-
 public class Main {
     //Size of board
     private int boardSize = 10;
