@@ -1,3 +1,4 @@
+
 public class Square {
 
     //Symbol to draw on each square

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> d9c497f30f4eb896dc2a3a0497723026e75d5651
 public enum Ships{
 
     Battleship('B', "Battleship", 4),
