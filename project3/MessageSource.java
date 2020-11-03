@@ -1,6 +1,3 @@
-package com.company;
-import com.company.MessageListener;
-
 import java.util.ArrayList;
 import java.util.List;
 

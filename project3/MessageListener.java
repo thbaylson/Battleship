@@ -1,4 +1,4 @@
-package com.company;
+
 /**
  * This interface represents &quot;observers&quot; of <code>MessageSource</code>s.
  *

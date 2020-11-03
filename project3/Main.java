@@ -1,4 +1,3 @@
-package com.company;
 
 public class Main {
     //Size of board
@@ -41,7 +40,7 @@ public class Main {
         String row = "\t";
         String mid = "\t|";
         String hold = "     ";
-        StringBuilder val = new StringBuilder("       0");
+        StringBuilder val = new StringBuilder("\t   0");
         //Printing the column numbers at the top
         for(int i = 1; i < board.length; i++){
             val.append(hold).append(i);
