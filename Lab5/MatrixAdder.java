@@ -1,7 +1,10 @@
 /**
- *  Scott Barlowe
- *  Starter file for thread exercise
- *
+ * Tyler Baylson
+ * Dillon Gorlseky
+ * Scott Barlowe
+ * 11/03/20 
+ * Scott Barlowe
+ * Starter file for thread exercise
  */
 import java.util.concurrent.Executors;
 import java.util.*;

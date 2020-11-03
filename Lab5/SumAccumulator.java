@@ -1,9 +1,10 @@
 /**
+ * Tyler Baylson
+ * Dillon Gorlseky
+ * Scott Barlowe
+ * 11/03/20
  * Support file inspired by https://www.cs-book.com/OS9/java-dir/4.pdf
- *
  */
-
-
 public class SumAccumulator{
     private int sum;
 

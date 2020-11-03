@@ -1,9 +1,12 @@
 /**
- *  Scott Barlowe
+ * Tyler Baylson
+ * Dillon Gorlseky
+ * Scott Barlowe
+ * 11/03/20 
+ * Scott Barlowe
  * 
- *  Mostly empty file
+ * Mostly empty file
  */
-
 public class AdderWorker implements Runnable{
     private SumAccumulator sum;
     private int[] matrix;
