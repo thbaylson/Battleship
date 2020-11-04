@@ -8,10 +8,18 @@
 public class SumAccumulator{
     private int sum;
 
+    /**
+     * The purpose of this function is to get the sum 
+     * @return int: Total sum
+     */
     public int getSum(){
         return sum;
     }
 
+    /**
+     * This function's purpose is to increment the sum 
+     * @param int: New sum to be added
+     */
     public void setSum(int sum){
         this.sum += sum;
     }
