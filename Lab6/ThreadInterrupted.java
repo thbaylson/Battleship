@@ -9,6 +9,11 @@ import java.util.*;
 
 public class ThreadInterrupted{
 
+    /**
+     * The purpose of this function is to create two threads each with their
+     * own AnotherAdderWorker objects, start them, then periodically make 
+     * them sleep for a set amount of time before interrupting them.
+     */
     public static void main(String[] args){
         AnotherAdderWorker worker1 = new AnotherAdderWorker(0);
         AnotherAdderWorker worker2 = new AnotherAdderWorker(1);
