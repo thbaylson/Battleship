@@ -1,39 +1,24 @@
-
-public class Main {
+public class Grid {
     //Size of board
     private int boardSize = 10;
     private String port;
+    Square[][] board;
 
-    public static void main(String[] args) {
-        int boardSize = 10;
-        if(args.length == 1){
-        } else {
-            try {
-                //System.out.println(boardSize);
-                boardSize = Integer.parseInt(args[1]);
-                if(boardSize < 2){
-                    boardSize = 10;
-                }
-            }catch(NumberFormatException e){
-                boardSize = 10;
-            }
-        }
+    public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
-        Square[][] board = new Square[boardSize][boardSize];
+        this.board = new Square[boardSize][boardSize];
         for(int i = 0; i < boardSize; i++){
             for(int j = 0; j < boardSize; j++){
                 board[i][j] = new Square();
             }
         }
-       // board[5][3].setToDraw("A");
-        String trueBoard = drawBoard(true, board);
-        String falseBoard = drawBoard(false, board);
-        System.out.println(trueBoard);
-        System.out.println("----------------------");
-        System.out.println(falseBoard);
     }
 
-    public static String drawBoard(boolean s, Square[][] board){
+    public void setPiece(Ships s, int i, int j){
+        this.board[i][j] = s;
+    }
+
+    public String toString(){
         String table = "";
         String topRow = "+-----";
         String midRow = "|";
@@ -52,7 +37,7 @@ public class Main {
             for(int i = 0; i < board.length; i++){
                 for(int j = 0; j < board[i].length; j++){
                     row += topRow;
-                    mid += "  " + board[i][j].getToDraw() + "  " + midRow;
+                    mid += board + midRow;
                     hold = row;
                 }
                 row = row + "+";

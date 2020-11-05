@@ -1,8 +1,7 @@
-
 public class Square {
 
     //Symbol to draw on each square
-    private String toDraw;
+    private Ship piece;
 
     //If square holds piece
     public boolean holdsPiece;
@@ -11,13 +10,13 @@ public class Square {
 
     public Square(){
         this.holdsPiece = false;
-        this.toDraw = "S";
+        this.piece = "S";
     }
 
     //Clears square of ship
     public void clear(){
         this.holdsPiece = false;
-        this.toDraw = " ";
+        this.piece = " ";
     }
 
     public void setHoldsPiece(boolean b){
@@ -29,10 +28,10 @@ public class Square {
     }
 
     public void setToDraw(String symbol){
-        this.toDraw = symbol;
+        this.piece = symbol;
     }
 
-    public String getToDraw(){
-        return this.toDraw;
+    public String toString(){
+        return " " + this.piece + " ";
     }
 }
