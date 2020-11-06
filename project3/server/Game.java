@@ -18,6 +18,8 @@ public class Game {
     
     public Game(int boardSize){
         this.board = new Grid(boardSize);
+        clients = new ArrayList<>();
+        clients.add(board);
     }
 
     public void printBoards(){

@@ -39,6 +39,6 @@ public class Square {
     }
 
     public String toString(){
-        return " " + this.piece + " ";
+        return this.piece;
     }
 }
