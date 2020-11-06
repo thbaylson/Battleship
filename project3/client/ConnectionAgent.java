@@ -7,6 +7,8 @@
 package client;
 
 import java.io.PrintStream;
+import java.net.Socket;
+import java.util.Scanner;
 
 /**
  * This is the class responsible for sending messages to and receiving messages from remote hosts.

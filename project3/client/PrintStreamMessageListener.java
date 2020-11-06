@@ -6,25 +6,34 @@
 
 package client;
 
+import common.MessageListener;
+import common.MessageSource;
+
+import java.io.PrintStream;
+
 /**
  * PrintStreamMessageListener is a class that is responsible for writing
- * messages to a PrintStream (e.g., System.out). The class implements the 
- * MessageListener interface, indicating that it plays the role of "observer"
- * in an instance of the observer pattern.
+ * messages to a PrintStream (e.g., System.out). The class implements the
+ * MessageListener interface, indicating that it plays the role of "observer" in
+ * an instance of the observer pattern.
  */
-public class PrintStreamMessageListener implements MessageListener{
+public class PrintStreamMessageListener implements MessageListener {
 
     private PrintStream out;
 
-    public PrintStreamMessageListener(PrintStream out){
+    public PrintStreamMessageListener(PrintStream out) {
         this.out = out;
     }
 
-    public void messageReceived(String msg, MessageSource source){
+    @Override
+    public void messageReceived(String message, MessageSource source) {
+        // TODO Auto-generated method stub
 
     }
 
-    public void sourceClosed(MessageSource source){
+    @Override
+    public void sourceClosed(MessageSource source) {
+        // TODO Auto-generated method stub
 
     }
     

@@ -30,6 +30,6 @@ public class BattleServer {
             }
         }
 
-        Game game = new Game();
+        Game game = new Game(boardSize);
     }
 }

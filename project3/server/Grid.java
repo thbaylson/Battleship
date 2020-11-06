@@ -10,10 +10,11 @@ package server;
  * Grid is the logic for a single board of Battleship.
  */
 public class Grid {
+    
     //Size of board
     private int boardSize = 10;
     private String port;
-    Square[][] board;
+    private Square[][] board;
 
     public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
@@ -26,7 +27,7 @@ public class Grid {
     }
 
     public void setPiece(Ships s, int i, int j){
-        this.board[i][j] = s;
+        this.board[i][j].setToDraw(s.toString());
     }
 
     public String toString(){
@@ -43,6 +44,7 @@ public class Grid {
         }
         String temp = "";
         table = val.toString();
+        /**
         if(s){
             //Formatting the board per line
             for(int i = 0; i < board.length; i++){
@@ -79,6 +81,7 @@ public class Grid {
             //Printing bottom line of board
             table += "\n" + hold + "+";
         }
+        */
         return table;
     }
 }

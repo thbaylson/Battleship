@@ -3,29 +3,30 @@
  * Instructor: Dr. Scott Barlowe
  * Date: November 2020
  */
+package server;
 
 public enum Ships{
 
     Battleship('B', "Battleship", 4),
-    Cruiser('R', "Cruiser", 3),
     Carrier('C', "Carrier", 5),
-    Submarine('S', "Submarine", 3),
+    Cruiser('R', "Cruiser", 3),
     Destroyer('D', "Destroyer", 2),
     Hit('@', "Hit", 1),
-    Miss('X', "Miss", 1);
+    Miss('X', "Miss", 1),
+    Submarine('S', "Submarine", 3);
 
-    private char letter;
+    private char symbol;
     private String type;
     private int length;
 
-    Ships(char letter, String type, int length){
-        this.letter = letter;
+    Ships(char symbol, String type, int length){
+        this.symbol = symbol;
         this.type = type;
         this.length = length;
     }
 
-    public char getLetter() {
-        return letter;
+    public char getSymbol() {
+        return symbol;
     }
 
     public String getType() {
@@ -44,11 +45,11 @@ public enum Ships{
         this.type = type;
     }
 
-    public void setLetter(char letter) {
-        this.letter = letter;
+    public void setLetter(char symbol) {
+        this.symbol = symbol;
     }
 
     public String toString(){
-        return this.letter;
+        return this.symbol + "";
     }
 }

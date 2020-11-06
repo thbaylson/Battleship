@@ -3,11 +3,12 @@
  * Instructor: Dr. Scott Barlowe
  * Date: November 2020
  */
+package server;
 
 public class Square {
 
     //Symbol to draw on each square
-    private Ship piece;
+    private String piece;
 
     //If square holds piece
     public boolean holdsPiece;
@@ -16,7 +17,7 @@ public class Square {
 
     public Square(){
         this.holdsPiece = false;
-        this.piece = "S";
+        this.piece = (" ");
     }
 
     //Clears square of ship

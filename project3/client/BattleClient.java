@@ -6,7 +6,10 @@
 
 package client;
 
+import common.MessageSource;
+
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 /**
  * BattleClient is one of the classes that implement the client-side logic of this client-server application. It
@@ -21,7 +24,7 @@ public class BattleClient {
     private int port;
     private String username;
 
-    public BattleClient(String hostname, int port, String username){
+    public BattleClient(String hostname, int port, String username) throws UnknownHostException{
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
