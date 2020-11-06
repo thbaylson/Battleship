@@ -6,6 +6,8 @@
 
 package server;
 
+import java.util.Random;
+
 /**
  * Grid is the logic for a single board of Battleship.
  */
@@ -13,9 +15,13 @@ public class Grid {
     //Final Fields
     private static final int DEFAULT_SIZE = 5;
     
-    //Size of board
+    //Size of the board
     private int boardSize;
+    
+    //Connecting port
     private String port;
+    
+    //2-Dimensional array of squares representing the game board
     private Square[][] board;
 
     public Grid(){
@@ -35,6 +41,39 @@ public class Grid {
 
     public void setPiece(Ships s, int i, int j){
         this.board[i][j].setToDraw(s.toString());
+    }
+
+    public void setRandomPiece(){
+        Random rand = new Random();
+        Ships ship = Ships.values()[rand.nextInt(Ships.values().length)];
+        int orientation = rand.nextInt(3);
+        int sLength = ship.getLength();
+        
+        int widthRange;
+        int heightRange;
+
+        switch(orientation){
+            case 0:
+                // Place the top first, then subsequent pieces down
+                widthRange = rand.nextInt(boardSize);
+                heightRange = rand.nextInt(boardSize - sLength);
+                break;
+            case 1:
+                //Place the bottom first, then subsequent pieces up
+                widthRange = rand.nextInt(boardSize);
+                heightRange = rand.nextInt(sLength - boardSize) + boardSize;
+                break;
+            case 2:
+                // Place the leftmost first, then subsequent pieces to the right
+                widthRange = rand.nextInt(boardSize);
+                heightRange = rand.nextInt(boardSize);
+                break;
+            case 3:
+                // Place the rightmost first, then subsequent pieces to the left
+                widthRange = rand.nextInt(boardSize);
+                heightRange = rand.nextInt(boardSize);
+                break;
+        }
     }
 
     public String toString(){

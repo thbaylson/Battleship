@@ -7,6 +7,7 @@
 package server;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * Game contains the logic for the game of BattleShip. It has a Grid for each
@@ -14,17 +15,51 @@ import java.util.ArrayList;
  */
 public class Game {
     private ArrayList<Grid> clients;
-    private Grid board;
     
     public Game(int boardSize){
-        this.board = new Grid(boardSize);
         clients = new ArrayList<>();
-        clients.add(board);
+        clients.add(new Grid(boardSize));
+        for(Grid g : clients){
+            setPieces(g, boardSize);
+        }
     }
 
     public void printBoards(){
         for(Grid g : clients){
             System.out.println(g);
         }
+    }
+
+    private void setPieces(Grid g, int boardSize){
+        //findBounds returns a 2D array of size 2. 
+        //Values can be assumed to be [a low bound int, a high bound int]
+        int[] bounds = findBounds(boardSize);
+        Random rand = new Random();
+        int numPieces= rand.nextInt(bounds[1] - bounds[0]) + bounds[0] + 1;
+        for(int i = 0; i < numPieces; i++){
+            g.setRandomPiece();
+        }
+    }
+
+    /**
+     * Calculates the range of pieces a board should have given
+     * the size of the board.
+     * @param boardSize The size of the board.
+     * @return A 2D array of integers that represent a low and high bound
+     */
+    private int[] findBounds(int boardSize){
+        int lowBound = 0;
+        int highBound = 0;
+
+        if(boardSize > 7){
+            lowBound = (boardSize/2-1);
+            highBound = (boardSize/2+1);
+        }else{
+            lowBound = (boardSize/2-1);
+            highBound = (boardSize/2);
+        }
+        
+        int[] bounds = {lowBound, highBound};
+        return bounds;
     }
 }
