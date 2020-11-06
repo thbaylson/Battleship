@@ -1,5 +1,4 @@
-
-public class Main {
+public class Grid {
     //Size of board
     private int boardSize = 10;
     private String port;
@@ -7,6 +6,7 @@ public class Main {
     public static void main(String[] args) {
         int boardSize = 10;
         if(args.length == 1){
+
         } else {
             try {
                 //System.out.println(boardSize);
