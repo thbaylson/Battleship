@@ -1,15 +1,29 @@
+/**
+ * Authors: Tyler Baylson & Dillion Gorlesky
+ * Instructor: Dr. Scott Barlowe
+ * Date: November 2020
+ */
+
+package common;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * A class that implements the "subject" code necessary to notify "observers" of the receipt
+ * of a message. Any class that is capable of receiving a message must extend this class. Upon receipt of a
+ * message, that class must invoke the notifyReceipt() method to forward the received message to any registered
+ * observers. When a message source is closed (i.e., the listener should expect to receive no more messages
+ * from the source), the source should invoke sourceClosed() on the MessageListener.
+
  * This class represents an abstract message source &ndash; a subject in the observer pattern.
  * This class should be extended by classes that want to deliver messages to some set of interested
- * parties.  These &quot;interested parties&quot; are decoupled from the implementation of this
- * class &ndash; those classes must implement the <code>MessageListener</code> interface.
+ * parties.  These "interested parties" are decoupled from the implementation of this
+ * class &ndash; those classes must implement the MessageListener interface.
  *
- * <b> The two concepts have been decoupled from one another:
+ * The two concepts have been decoupled from one another:
  * Meaning that classes that are the source of message must implement the MessageSource interface
- * classes that want to be notified must implment MessageListener. </b>
+ * classes that want to be notified must implment MessageListener.
  *
  * @author Dr. William Kreahling
  * @version November 2017
