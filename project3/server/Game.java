@@ -1,5 +1,13 @@
 /**
- * Has a grid for each client
+ * Authors: Tyler Baylson & Dillion Gorlesky
+ * Instructor: Dr. Scott Barlowe
+ * Date: November 2020
+ */
+
+package server;
+
+/**
+ * Game contains the logic for the game of BattleShip. It has a Grid for each client.
  */
 public class Game {
     private ArrayList<Grid> clients;

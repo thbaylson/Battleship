@@ -1,3 +1,14 @@
+/**
+ * Authors: Tyler Baylson & Dillion Gorlesky
+ * Instructor: Dr. Scott Barlowe
+ * Date: November 2020
+ */
+
+package server;
+
+/**
+ * Grid is the logic for a single board of Battleship.
+ */
 public class Grid {
     //Size of board
     private int boardSize = 10;

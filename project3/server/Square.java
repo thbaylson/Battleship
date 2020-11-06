@@ -1,3 +1,9 @@
+/**
+ * Authors: Tyler Baylson & Dillion Gorlesky
+ * Instructor: Dr. Scott Barlowe
+ * Date: November 2020
+ */
+
 public class Square {
 
     //Symbol to draw on each square

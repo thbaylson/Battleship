@@ -1,3 +1,9 @@
+/**
+ * Authors: Tyler Baylson & Dillion Gorlesky
+ * Instructor: Dr. Scott Barlowe
+ * Date: November 2020
+ */
+
 public enum Ships{
 
     Battleship('B', "Battleship", 4),
@@ -5,8 +11,8 @@ public enum Ships{
     Carrier('C', "Carrier", 5),
     Submarine('S', "Submarine", 3),
     Destroyer('D', "Destroyer", 2),
-    Hit('X', "Hit", 1),
-    Miss('M', "Miss", 1);
+    Hit('@', "Hit", 1),
+    Miss('X', "Miss", 1);
 
     private char letter;
     private String type;
