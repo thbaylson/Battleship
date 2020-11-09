@@ -137,9 +137,22 @@ public class Grid {
                     this.board[row][col].setToDraw(s.getParts()[index]);
                     if(s.isSunken()){
                         System.out.println(s.getType().getType() + " Was Sunk!");
+                        checkEndCondition();
                     }
                 }
             }
+        }
+    }
+
+    private void checkEndCondition(){
+        int sunkenShips = 0;
+        for(Ship s : ships){
+            if(s.isSunken()){
+                sunkenShips++;
+            }
+        }
+        if(sunkenShips == ships.size()){
+            System.out.println("Player Loses!");
         }
     }
 
