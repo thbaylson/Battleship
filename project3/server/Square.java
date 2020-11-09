@@ -11,31 +11,35 @@ public class Square {
     private String piece;
 
     //If square holds piece
-    public boolean holdsPiece;
+    private boolean isEmpty;
 
     //Add one for length of piece maybe?
 
     public Square(){
-        this.holdsPiece = false;
-        this.piece = (" ");
+        clear();
     }
 
-    //Clears square of ship
+    //Clears the square
     public void clear(){
-        this.holdsPiece = false;
         this.piece = " ";
+        this.isEmpty = true;
     }
 
-    public void setHoldsPiece(boolean b){
-        this.holdsPiece = b;
+    public boolean isEmpty(){
+        return this.isEmpty;
     }
 
-    public boolean getsHoldsPiece(){
-        return this.holdsPiece;
+    public void miss(){
+        this.piece = "X";
     }
 
     public void setToDraw(String symbol){
         this.piece = symbol;
+        this.isEmpty = false;
+    }
+
+    public void setToDraw(char symbol){
+        setToDraw(symbol + "");
     }
 
     public String toString(){
