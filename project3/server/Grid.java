@@ -6,6 +6,7 @@
 
 package server;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -24,12 +25,15 @@ public class Grid {
     //2-Dimensional array of squares representing the game board
     private Square[][] board;
 
+    private ArrayList<Ship> ships;
+
     public Grid(){
         this(DEFAULT_SIZE);
     }
 
     public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
+        this.ships = new ArrayList<>();
         this.boardSize = boardSize;
         this.board = new Square[boardSize][boardSize];
         for(int i = 0; i < boardSize; i++){
@@ -39,41 +43,67 @@ public class Grid {
         }
     }
 
-    public void setPiece(Ships s, int i, int j){
-        this.board[i][j].setToDraw(s.toString());
+    /**
+     * Assumes the piece to be set has a valid size and placement
+     * @param s
+     */
+    private boolean setPiece(Ship s){
+        int col = s.getHead()[0];
+        int row = s.getHead()[1];
+
+        boolean validHeadIndex = 
+            verifyIndex(row, col) && this.board[row][col].isEmpty();
+        
+        //Before we draw on the board, we need to make sure the ship fits
+        int lastRow = row + s.getDirection().getMovement()[1] * (s.getLength()-1);
+        int lastCol = col + s.getDirection().getMovement()[0] * (s.getLength()-1);
+        System.out.println("Attempting: " + s + "; Last Row: " + lastRow + "; Last Col: " + lastCol);
+        boolean shipFits = validHeadIndex && verifyIndex(lastRow, lastCol);
+
+        //Before we draw on the board, we need to make sure ships don't collide
+        boolean allSpotsValidAndEmpty = shipFits;
+        for(int i = 1; i < s.getLength() && allSpotsValidAndEmpty; i++){
+            col += s.getDirection().getMovement()[0];
+            row += s.getDirection().getMovement()[1];
+            allSpotsValidAndEmpty = this.board[row][col].isEmpty();
+        }
+
+        if(allSpotsValidAndEmpty){
+            //Reset the head pointers
+            col = s.getHead()[0];
+            row = s.getHead()[1];
+
+            //Draw the ship
+            this.board[row][col].setToDraw(s.getParts()[0]);
+            for(int i = 1; i < s.getLength(); i++){
+                col += s.getDirection().getMovement()[0];
+                row += s.getDirection().getMovement()[1];
+                this.board[row][col].setToDraw(s.getParts()[i]);
+            }
+            this.ships.add(s);
+        }
+        return allSpotsValidAndEmpty;
     }
 
     public void setRandomPiece(){
         Random rand = new Random();
-        Ships ship = Ships.values()[rand.nextInt(Ships.values().length)];
-        int orientation = rand.nextInt(3);
-        int sLength = ship.getLength();
-        
-        int widthRange;
-        int heightRange;
-
-        switch(orientation){
-            case 0:
-                // Place the top first, then subsequent pieces down
-                widthRange = rand.nextInt(boardSize);
-                heightRange = rand.nextInt(boardSize - sLength);
-                break;
-            case 1:
-                //Place the bottom first, then subsequent pieces up
-                widthRange = rand.nextInt(boardSize);
-                heightRange = rand.nextInt(sLength - boardSize) + boardSize;
-                break;
-            case 2:
-                // Place the leftmost first, then subsequent pieces to the right
-                widthRange = rand.nextInt(boardSize);
-                heightRange = rand.nextInt(boardSize);
-                break;
-            case 3:
-                // Place the rightmost first, then subsequent pieces to the left
-                widthRange = rand.nextInt(boardSize);
-                heightRange = rand.nextInt(boardSize);
-                break;
+        boolean pieceSet = false;
+        while(!pieceSet){
+            ShipType type = ShipType.values()[
+                rand.nextInt(ShipType.values().length)];
+            Direction dir = Direction.values()[
+                rand.nextInt(Direction.values().length)];
+            
+            int[] head = {rand.nextInt(boardSize), rand.nextInt(boardSize)};
+            Ship ship = new Ship(type, dir, head);
+            pieceSet = setPiece(ship);
         }
+    }
+
+    private boolean verifyIndex(int row, int col){
+        boolean validRow = 0 <= row && row < boardSize;
+        boolean validCol = 0 <= col && col < boardSize;
+        return validRow && validCol;
     }
 
     public String toString(){

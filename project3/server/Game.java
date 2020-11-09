@@ -31,11 +31,11 @@ public class Game {
     }
 
     private void setPieces(Grid g, int boardSize){
-        //findBounds returns a 2D array of size 2. 
+        //findBounds returns an array of size 2. 
         //Values can be assumed to be [a low bound int, a high bound int]
         int[] bounds = findBounds(boardSize);
         Random rand = new Random();
-        int numPieces= rand.nextInt(bounds[1] - bounds[0]) + bounds[0] + 1;
+        int numPieces= rand.nextInt(bounds[1] - bounds[0] + 1) + bounds[0];
         for(int i = 0; i < numPieces; i++){
             g.setRandomPiece();
         }
@@ -45,7 +45,7 @@ public class Game {
      * Calculates the range of pieces a board should have given
      * the size of the board.
      * @param boardSize The size of the board.
-     * @return A 2D array of integers that represent a low and high bound
+     * @return An array of integers that represents bounds for number of pieces
      */
     private int[] findBounds(int boardSize){
         int lowBound = 0;
@@ -58,7 +58,7 @@ public class Game {
             lowBound = (boardSize/2-1);
             highBound = (boardSize/2);
         }
-        
+        System.out.println("Low bound: " + lowBound + "; High bound: " + highBound);
         int[] bounds = {lowBound, highBound};
         return bounds;
     }
