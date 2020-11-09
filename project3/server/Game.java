@@ -41,6 +41,10 @@ public class Game {
         }
     }
 
+    public void attack(int row, int col){
+        clients.get(0).attack(row, col);
+    }
+
     /**
      * Calculates the range of pieces a board should have given
      * the size of the board.
@@ -58,7 +62,6 @@ public class Game {
             lowBound = (boardSize/2-1);
             highBound = (boardSize/2);
         }
-        System.out.println("Low bound: " + lowBound + "; High bound: " + highBound);
         int[] bounds = {lowBound, highBound};
         return bounds;
     }

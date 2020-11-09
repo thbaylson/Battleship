@@ -1,8 +1,8 @@
 package server;
 
 public enum Direction{
-    UP("UP", 0, 1),
-    DOWN("DOWN", 0, -1),
+    UP("UP", 0, -1),
+    DOWN("DOWN", 0, 1),
     LEFT("LEFT", -1, 0),
     RIGHT("RIGHT", 1, 0);
 

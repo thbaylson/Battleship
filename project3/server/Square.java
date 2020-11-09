@@ -29,6 +29,10 @@ public class Square {
         return this.isEmpty;
     }
 
+    public void miss(){
+        this.piece = "X";
+    }
+
     public void setToDraw(String symbol){
         this.piece = symbol;
         this.isEmpty = false;

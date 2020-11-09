@@ -57,7 +57,6 @@ public class Grid {
         //Before we draw on the board, we need to make sure the ship fits
         int lastRow = row + s.getDirection().getMovement()[1] * (s.getLength()-1);
         int lastCol = col + s.getDirection().getMovement()[0] * (s.getLength()-1);
-        System.out.println("Attempting: " + s + "; Last Row: " + lastRow + "; Last Col: " + lastCol);
         boolean shipFits = validHeadIndex && verifyIndex(lastRow, lastCol);
 
         //Before we draw on the board, we need to make sure ships don't collide
@@ -96,7 +95,51 @@ public class Grid {
             
             int[] head = {rand.nextInt(boardSize), rand.nextInt(boardSize)};
             Ship ship = new Ship(type, dir, head);
+            //System.out.println("Attempting a: " + type.getSymbol() + " facing " + dir.getName() + " at col " + head[0] + ", row " + head[1]);
             pieceSet = setPiece(ship);
+        }
+    }
+
+    public void attack(int row, int col){
+        if(this.board[row][col].isEmpty()){
+            this.board[row][col].miss();
+        }else{
+            for(Ship s : ships){
+                //System.out.println("\tInside for each loop");
+                int startRow = s.getHead()[1];
+                int lastRow = startRow + 
+                    s.getDirection().getMovement()[1] * (s.getLength()-1);
+                
+                int startCol = s.getHead()[0];
+                int lastCol = startCol + 
+                    s.getDirection().getMovement()[0] * (s.getLength()-1);
+                
+                //System.out.println("\tAttacking: col " + col + ", row " + row);
+                //System.out.println("\tCol between " + startCol + " and " + lastCol);
+                //System.out.println("\tRow between " + startRow + " and " + lastRow);
+                int temp;
+                if(startCol > lastCol){
+                    temp = startCol;
+                    startCol = lastCol;
+                    lastCol = temp;
+                }
+                if(startRow > lastRow){
+                    temp = startRow;
+                    startRow = lastRow;
+                    lastRow = temp;
+                }
+                boolean validRow = startRow <= row && row <= lastRow;
+                boolean validCol = startCol <= col && col <= lastCol;
+                if(validRow && validCol && !s.isSunken()){
+                    //System.out.println("\t\tInside validation check");
+                    int index = Math.abs(startRow - row) + Math.abs(startCol - col);
+                    s.hit(index);
+                    this.board[row][col].setToDraw(s.getParts()[index]);
+                    if(s.isSunken()){
+                        System.out.println(s.getType().getType() + " Was Sunk!");
+                    }
+                }
+            }
         }
     }
 

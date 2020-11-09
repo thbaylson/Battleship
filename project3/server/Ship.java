@@ -34,6 +34,10 @@ public class Ship{
         return head;
     }
 
+    public ShipType getType(){
+        return this.type;
+    }
+
     public Direction getDirection(){
         return direction;
     }
@@ -56,7 +60,9 @@ public class Ship{
     }
 
     public void hit(int index){
+        //System.out.println("\t\t\tInside Ship.hit()");
         if(0 <= index && index < this.parts.length){
+            //System.out.println("\t\t\t\tSetting symbol at index: " + index);
             this.parts[index] = '@';
         }
     }
