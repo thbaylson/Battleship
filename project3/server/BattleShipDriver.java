@@ -36,6 +36,7 @@ public class BattleShipDriver {
         Game game = new Game(boardSize);
         System.out.println("\nOriginal Board: \n");
         game.printBoards();
+        System.out.println("Using args[0] to attack that many random locations:");
         for(int i = 0; i < Integer.parseInt(args[0]); i++){
             Random rand = new Random();
             int row = rand.nextInt(boardSize);
