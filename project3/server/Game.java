@@ -58,8 +58,8 @@ public class Game {
         }
     }
 
-    public void attack(int row, int col){
-        players.get(0).attack(row, col);
+    public void attack(int index, int row, int col){
+        players.get(index).attack(row, col);
     }
 
     /**
