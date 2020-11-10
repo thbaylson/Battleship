@@ -21,6 +21,10 @@ public enum ShipType{
         return symbol;
     }
 
+    public String getAllSymbols(){
+        return "BCRDS";
+    }
+
     public String getType() {
         return type;
     }

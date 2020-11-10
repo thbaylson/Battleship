@@ -38,13 +38,17 @@ public class Game {
 
     public String getInactiveBoard(int index){
         String inactive = players.get(index).toString();
+        System.out.println("---------------------");
+        System.out.println(inactive);
+        System.out.println("---------------------");
         String shipSymbols = "";
         for(int i = 0; i < ShipType.values().length; i++){
             shipSymbols += ShipType.values()[i].getSymbol();
         }
-        String regex = "^([" + shipSymbols + "]){1}$";
-        inactive.replaceAll(regex, " ");
-        return inactive.toString();
+        String regex = "^([" + shipSymbols + "])";
+        System.out.println(shipSymbols);
+        //inactive.replaceAll(regex, " ");
+        return inactive.replaceAll("D", " ");
     }
 
     private void setPieces(Grid g, int boardSize){

@@ -28,13 +28,14 @@ public class BattleClient implements MessageListener{
     private InetAddress host;
     private int port;
     private String username;
-    public int boardSize;
-    public boolean playing;
-    public ArrayList<String> names;
-    public int activePlayers;
-    private String invalidCmd1 = "Valid Command are: \n\t /join <username>" +
+    private int boardSize;
+    private Game game;
+    private boolean playing;
+    private ArrayList<String> names;
+    private int activePlayers;
+    private final String invalidCmd1 = "Valid Command are: \n\t /join <username>" +
                                 "\n\t /play \n\t /attack <username> <target> <[0-";
-    private String invalidCmd2 = "]>" +
+    private final String invalidCmd2 = "]>" +
                                 "\n\t /quit <name>\n\t /show <username> <target>\n";
 
     /** 
@@ -81,7 +82,7 @@ public class BattleClient implements MessageListener{
                     buff = s.next();
                 }
             }
-            Game game = new Game(boardSize);
+            this.game = new Game(boardSize);
             this.boardSize--;
             System.out.println("To Join, Enter /join name");
            // Socket socket = new Socket(this.host, this.port);
@@ -94,12 +95,12 @@ public class BattleClient implements MessageListener{
                     String[] cmds = command.split(" ");
                     if(cmds[0].toLowerCase().equals("/join")){
                         game.addPlayer();
-                        
-                        
                     } else if(cmds[0].toLowerCase().equals("/play")){
                             
                     } else if(cmds[0].toLowerCase().equals("/attack")){
                             attacking(cmds);
+                            int index = names.indexOf(cmds[2]);
+                            System.out.println(game.getInactiveBoard(index));
                     } else if(cmds[0].toLowerCase().equals("/quit")){
                             if(activePlayers == 0){
                                 s.close();
@@ -133,7 +134,15 @@ public class BattleClient implements MessageListener{
      * @param commands: Arguments include <person_req> <target>
      */
     public void showing(String[] commands){
-
+        String request = commands[1];
+        String target = commands[2];
+        if(request.equals(target)){
+            int index = names.indexOf(request);
+            System.out.println(game.getActiveBoard(index));
+        } else {
+            int index = names.indexOf(target);
+            System.out.println(game.getInactiveBoard(index));
+        }
     }
 
     /**
@@ -143,6 +152,8 @@ public class BattleClient implements MessageListener{
     public void attacking(String[] commands){
         int row = Integer.parseInt(commands[3]);
         int col = Integer.parseInt(commands[4]);
+        int index = names.indexOf(commands[2]);
+        game.attack(index,row, col);
     }
 
     public boolean validCmd(String command){
@@ -189,8 +200,10 @@ public class BattleClient implements MessageListener{
         for(String name : names){
             if(name.equals(cmds[1])){
                 System.out.println("Player: " + cmds[1] + " has surrendered.");
+                int index = names.indexOf(cmds[1]);
                 names.remove(cmds[1]);
                 activePlayers--;
+                this.game.removePlayerAt(index);
                 if(activePlayers == 1){
                     playing = false;
                 }
