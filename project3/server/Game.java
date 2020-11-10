@@ -14,20 +14,37 @@ import java.util.Random;
  * client.
  */
 public class Game {
-    private ArrayList<Grid> clients;
+    private ArrayList<Grid> players;
+    private int boardSize;
     
     public Game(int boardSize){
-        clients = new ArrayList<>();
-        clients.add(new Grid(boardSize));
-        for(Grid g : clients){
-            setPieces(g, boardSize);
-        }
+        this.boardSize = boardSize;
+        players = new ArrayList<>();
     }
 
-    public void printBoards(){
-        for(Grid g : clients){
-            System.out.println(g);
+    public void addPlayer(){
+        Grid g = new Grid();
+        setPieces(g, boardSize);
+        players.add(g);
+    }
+
+    public void removePlayerAt(int index){
+        players.remove(index);
+    }
+
+    public String getActiveBoard(int index){
+        return players.get(index).toString();
+    }
+
+    public String getInactiveBoard(int index){
+        String inactive = players.get(index).toString();
+        String shipSymbols = "";
+        for(int i = 0; i < ShipType.values().length; i++){
+            shipSymbols += ShipType.values()[i].getSymbol();
         }
+        String regex = "^([" + shipSymbols + "]){1}$";
+        inactive.replaceAll(regex, " ");
+        return inactive.toString();
     }
 
     private void setPieces(Grid g, int boardSize){
@@ -41,8 +58,8 @@ public class Game {
         }
     }
 
-    public void attack(int row, int col){
-        clients.get(0).attack(row, col);
+    public void attack(int index, int row, int col){
+        players.get(index).attack(row, col);
     }
 
     /**
