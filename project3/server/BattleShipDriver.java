@@ -19,19 +19,22 @@ public class BattleShipDriver {
         if(args.length == 1){
         } else {
             try {
-                //System.out.println(boardSize);
+                int port = Integer.parseInt(args[0]);
                 boardSize = Integer.parseInt(args[1]);
-                if(boardSize < 2){
-                    boardSize = 10;
+                if(boardSize < 5){
+                    System.out.println("Usage: java server.BattleShipDriver port boardSize(5-10)");
+                    System.exit(1);
+                } else if(boardSize > 10){
+                    System.out.println("Usage: java server.BattleShipDriver port boardSize(5-10)");
+                    System.exit(1);
                 }
+                BattleServer battleServer = new BattleServer(port, boardSize);
+                battleServer.listen();
             }catch(NumberFormatException e){
-                //TODO: print usage message
+                System.out.println("Invalid Board Size Given. Please Retry.");
+                System.out.println("Usage: java server.BattleShipDriver port boardSize(5-10)");
+                System.exit(1);
             }
-        }
-
-        System.out.println("Size: " + boardSize);
-        Game game = new Game(boardSize);
-        System.out.println("\n Board: \n");
-        game.printBoards();
+        } 
     }
 }
