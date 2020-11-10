@@ -24,10 +24,19 @@ public class Game {
         }
     }
 
-    public void printBoards(){
-        for(Grid g : clients){
-            System.out.println(g);
+    public String getActiveBoard(int index){
+        return clients.get(index).toString();
+    }
+
+    public String getInactiveBoard(int index){
+        String inactive = clients.get(index).toString();
+        String shipSymbols = "";
+        for(int i = 0; i < ShipType.values().length; i++){
+            shipSymbols += ShipType.values()[i].getSymbol();
         }
+        String regex = "^([" + shipSymbols + "]){1}$";
+        inactive.replaceAll(regex, " ");
+        return inactive.toString();
     }
 
     private void setPieces(Grid g, int boardSize){

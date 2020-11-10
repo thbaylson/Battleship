@@ -43,6 +43,10 @@ public class Grid {
         }
     }
 
+    public int getBoardSize(){
+        return this.boardSize;
+    }
+
     /**
      * Assumes the piece to be set has a valid size and placement
      * @param s
