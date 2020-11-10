@@ -127,18 +127,22 @@ public class BattleClient implements MessageListener{
         }
     }
 
+    /**
+     * The purpose of this function is to handle any commands involving showing a board
+     * for the game
+     * @param commands: Arguments include <person_req> <target>
+     */
     public void showing(String[] commands){
 
     }
 
+    /**
+     * This functions purpose is to use the commands from the user to attack 
+     * @param commands: Arguments include <person_req> <target> <pos> <pos>
+     */
     public void attacking(String[] commands){
-        try{
-            int row = Integer.parseInt(commands[3]);
-            int col = Integer.parseInt(commands[4]);
-
-        }catch(NumberFormatException e){
-
-        }
+        int row = Integer.parseInt(commands[3]);
+        int col = Integer.parseInt(commands[4]);
     }
 
     public boolean validCmd(String command){
