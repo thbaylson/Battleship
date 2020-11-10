@@ -6,6 +6,7 @@
 
 package client;
 
+import server.*;
 import common.MessageListener;
 import common.MessageSource;
 import java.lang.*;
@@ -30,7 +31,7 @@ public class BattleClient implements MessageListener{
     public int boardSize;
     public boolean playing;
     public ArrayList<String> names;
-    public int activePlayers = 0;
+    public int activePlayers;
     private String invalidCmd1 = "Valid Command are: \n\t /join <username>" +
                                 "\n\t /play \n\t /attack <username> <target> <[0-";
     private String invalidCmd2 = "]>" +
@@ -54,8 +55,9 @@ public class BattleClient implements MessageListener{
 
     public void connect(){
         Scanner s = new Scanner(System.in);
-        boolean playing, properSize = false;
+        boolean playing = false, properSize = false;
         String buff;
+        this.activePlayers = 0;
         try{              
             System.out.println("Enter board size (5-10): ");
             if(s.hasNextInt()){//GETTING SIZE OF BOARD HERE
@@ -79,6 +81,7 @@ public class BattleClient implements MessageListener{
                     buff = s.next();
                 }
             }
+            Game game = new Game(boardSize);
             this.boardSize--;
             System.out.println("To Join, Enter /join name");
            // Socket socket = new Socket(this.host, this.port);
@@ -90,14 +93,19 @@ public class BattleClient implements MessageListener{
                 if(validCmd(command)){
                     String[] cmds = command.split(" ");
                     if(cmds[0].toLowerCase().equals("/join")){
+                        game.addPlayer();
+                        
                         
                     } else if(cmds[0].toLowerCase().equals("/play")){
                             
                     } else if(cmds[0].toLowerCase().equals("/attack")){
                             attacking(cmds);
                     } else if(cmds[0].toLowerCase().equals("/quit")){
-                            i++;
-                            
+                            if(activePlayers == 0){
+                                s.close();
+                                System.exit(0);
+                            } 
+                            //FIX QUITTING FOR FIRST COMMAND
                     } else if(cmds[0].toLowerCase().equals("/show")){
                             showing(cmds);
                     }
@@ -142,122 +150,150 @@ public class BattleClient implements MessageListener{
         if(cmdList.length < 1){//Because /play is length 1
             return false;
         }
-        boolean nameCheck = false;
-        if(cmdList.length == 2){//Maybe can be removed in case they do /join Jack ghsbgk hgrks
-            if(cmdList[0].toLowerCase().equals("/join")){//Join
-                for(String name : names){
-                    if(name.equals(cmdList[1])){
-                        System.out.println("Error: " + cmdList[1] + " is already in use. Please enter new name.");
-                        return false;
-                    }
-                }
-                activePlayers++;
-                names.add(cmdList[1]);
-                return true;
-            } else if(cmdList[0].toLowerCase().equals("/quit")){//QUIT
-                for(String name : names){
-                    if(name.equals(cmdList[1])){
-                        System.out.println("Player: " + cmdList[1] + " has surrendered.");
-                        names.remove(cmdList[1]);
-                        activePlayers--;
-                        return true;
-                    }
-                }
-                System.out.println("Error: " + cmdList[1] + " is not a player. Please retry.");
-                return false;
-            }
+        if(cmdList[0].toLowerCase().equals("/join")){//Join
+            return joinCmd(cmdList);
+        } else if(cmdList[0].toLowerCase().equals("/quit")){//QUIT
+            return quitCmd(cmdList);
+        } else if(cmdList[0].toLowerCase().equals("/play")){//PLAY
+            return playCmd(cmdList);
+        } else if(cmdList[0].toLowerCase().equals("/show")){//SHOW
+            return showCmd(cmdList);
+        } else if(cmdList[0].toLowerCase().equals("/attack")){//ATTACK
+            return attackCmd(cmdList);
         }
-        if(cmdList[0].toLowerCase().equals("/play")){//PLAY
+        return false;
+    }
+
+    public boolean playCmd(String[] cmds){
+        if(!playing){
             if(activePlayers >= 2){
                 System.out.println("Game can begin.");
                 this.playing = true;
             } else {
                 System.out.println("Error: Not enough players.");
             }
+        } else {
+            System.out.println("Error: Game already started.");
+        }
+        return true;
+    }
+
+    public boolean quitCmd(String[] cmds){
+        if(activePlayers == 0){
             return true;
         }
-
-        if(cmdList[0].toLowerCase().equals("/show")){//SHOW
-            if(cmdList.length >= 3){
-                //Checking first name exists
-                for(String person : names){
-                    if(cmdList[1].equals(person)){
-                        nameCheck = true;
-                    }
+        for(String name : names){
+            if(name.equals(cmds[1])){
+                System.out.println("Player: " + cmds[1] + " has surrendered.");
+                names.remove(cmds[1]);
+                activePlayers--;
+                if(activePlayers == 1){
+                    playing = false;
                 }
-                if(!nameCheck){
-                    System.out.println("Error: " + cmdList[1] + " Player name not found. Please retry.");
+                return true;
+            }
+        }
+        System.out.println("Error: " + cmds[1] + " is not a player. Please retry.");
+        return false;
+    }
+
+    public boolean joinCmd(String[] cmds){
+        if(!playing){
+            for(String name : names){
+                if(name.equals(cmds[1])){
+                    System.out.println("Error: " + cmds[1] + " is already in use. Please enter new name.");
                     return false;
                 }
-                //Checking target name exists
-                nameCheck = false;
-                for(String target : names){
-                    if(cmdList[2].equals(target)){
-                        nameCheck = true;
-                    }
+            }
+            activePlayers++;
+            names.add(cmds[1]);
+        } else { 
+            System.out.println("Error: Game already in progress. Can't join");
+        }
+        return true;
+    }
+
+    public boolean showCmd(String[] cmds){
+        boolean nameCheck = false;
+        if(cmds.length >= 3){
+            //Checking first name exists
+            for(String person : names){
+                if(cmds[1].equals(person)){
+                    nameCheck = true;
+                }
+            }
+            if(!nameCheck){
+                System.out.println("Error: " + cmds[1] + " Player name not found. Please retry.");
+                return false;
+            }
+            //Checking target name exists
+            nameCheck = false;
+            for(String target : names){
+                if(cmds[2].equals(target)){
+                    nameCheck = true;
+                }
+            }
+            if(!nameCheck){
+                System.out.println("Error: " + cmds[2] + " Player name not found. Please retry.");
+                return false;
+            }
+            return true;
+        } else {
+            System.out.println("Error: not enough arguments for show.");
+            return false;
+        }
+    }
+
+    public boolean attackCmd(String[] cmds){
+        boolean nameCheck = false;
+        if(cmds.length < 5){
+            System.out.println("Error: Not enough arguments given for attack command.");
+            return false;
+        } else {
+            //Checking first name exists
+            for(String person : names){
+                if(cmds[1].equals(person)){
+                    nameCheck = true;
+                }
+            }
+            if(!nameCheck){
+                System.out.println("Error: " + cmds[1] + " Player name not found. Please retry.");
+                return false;
+            }
+            //Checking target name exists
+            nameCheck = false;
+            for(String target : names){
+                if(cmds[2].equals(target)){
+                    nameCheck = true;
+                }
+            }
+            if(!nameCheck){
+                System.out.println("Error: " + cmds[2] + " Player name not found. Please retry.");
+                return false;
+            }
+            try{
+                int row = Integer.parseInt(cmds[3]);
+                int col = Integer.parseInt(cmds[4]);
+                if(!(row <= this.boardSize)){
+                    nameCheck = false;
                 }
                 if(!nameCheck){
-                    System.out.println("Error: " + cmdList[2] + " Player name not found. Please retry.");
+                    System.out.println("Error: " + cmds[3] + " Is not on the board.");
+                    return false;
+                }
+
+                if(!(col <= this.boardSize)){
+                    nameCheck = false;
+                }
+                if(!nameCheck){
+                    System.out.println("Error: " + cmds[4] + " Is not on the board.");
                     return false;
                 }
                 return true;
-            } else {
-                System.out.println("Error: not enough arguments for show.");
+            } catch(NumberFormatException e){
                 return false;
             }
         }
-
-        if(cmdList[0].toLowerCase().equals("/attack")){//ATTACK
-            if(cmdList.length < 5){
-                System.out.println("Error: Not enough arguments given for attack command.");
-                return false;
-            } else {
-                //Checking first name exists
-                for(String person : names){
-                    if(cmdList[1].equals(person)){
-                        nameCheck = true;
-                    }
-                }
-                if(!nameCheck){
-                    System.out.println("Error: " + cmdList[1] + " Player name not found. Please retry.");
-                    return false;
-                }
-                //Checking target name exists
-                nameCheck = false;
-                for(String target : names){
-                    if(cmdList[2].equals(target)){
-                        nameCheck = true;
-                    }
-                }
-                if(!nameCheck){
-                    System.out.println("Error: " + cmdList[2] + " Player name not found. Please retry.");
-                    return false;
-                }
-                try{
-                    int row = Integer.parseInt(cmdList[3]);
-                    int col = Integer.parseInt(cmdList[4]);
-                    if(!(row <= this.boardSize)){
-                        nameCheck = false;
-                    }
-                    if(!nameCheck){
-                        System.out.println("Error: " + cmdList[3] + " Is not on the board.");
-                        return false;
-                    }
-
-                    if(!(col <= this.boardSize)){
-                        nameCheck = false;
-                    }
-                    if(!nameCheck){
-                        System.out.println("Error: " + cmdList[4] + " Is not on the board.");
-                        return false;
-                    }
-                    return true;
-                } catch(NumberFormatException e){
-                    return false;
-                }
-            }
-        }
-        return false;
     }
 
     /**
