@@ -32,6 +32,7 @@ public class BattleShipDriver {
             }
         }
 
+        /** Testing without clients
         System.out.println("Size: " + boardSize);
         Game game = new Game(boardSize);
         System.out.println("\nOriginal Board: \n");
@@ -46,5 +47,6 @@ public class BattleShipDriver {
         }
         System.out.println("\nAttacked Board: \n");
         game.printBoards();
+        */
     }
 }
