@@ -196,7 +196,6 @@ public class Grid {
             }
             table.append(spacer);
         }
-
         return table.toString();
     }
 }
