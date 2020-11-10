@@ -15,13 +15,21 @@ import java.util.Random;
  */
 public class Game {
     private ArrayList<Grid> clients;
+    private int boardSize;
     
     public Game(int boardSize){
+        this.boardSize = boardSize;
         clients = new ArrayList<>();
-        clients.add(new Grid(boardSize));
-        for(Grid g : clients){
-            setPieces(g, boardSize);
-        }
+    }
+
+    public void addPlayer(){
+        Grid g = new Grid();
+        setPieces(g, boardSize);
+        clients.add(g);
+    }
+
+    public void removePlayerAt(int index){
+        clients.remove(index);
     }
 
     public String getActiveBoard(int index){
