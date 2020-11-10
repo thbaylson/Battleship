@@ -1,5 +1,3 @@
-<<<<<<< HEAD:project3/MessageListener.java
-=======
 /**
  * Authors: Tyler Baylson & Dillion Gorlesky
  * Instructor: Dr. Scott Barlowe
@@ -8,7 +6,6 @@
 
 package common;
 
->>>>>>> 1c9c6cc0a30786e5fc6890d2280eb42d7a36a7f2:project3/common/MessageListener.java
 /**
  * Defines the interface for objects that can observe other objects that receive messages. When
  * the subject receives a message, the message is forwarded to all registered observers.

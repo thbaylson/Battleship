@@ -6,6 +6,9 @@
 
 package server;
 
+import java.util.ArrayList;
+import java.util.Random;
+
 /**
  * Grid is the logic for a single board of Battleship.
  */
@@ -13,10 +16,16 @@ public class Grid {
     //Final Fields
     private static final int DEFAULT_SIZE = 5;
     
-    //Size of board
+    //Size of the board
     private int boardSize;
+    
+    //Connecting port
     private String port;
+    
+    //2-Dimensional array of squares representing the game board
     private Square[][] board;
+
+    private ArrayList<Ship> ships;
 
     public Grid(){
         this(DEFAULT_SIZE);
@@ -24,6 +33,7 @@ public class Grid {
 
     public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
+        this.ships = new ArrayList<>();
         this.boardSize = boardSize;
         this.board = new Square[boardSize][boardSize];
         for(int i = 0; i < boardSize; i++){
@@ -33,8 +43,123 @@ public class Grid {
         }
     }
 
-    public void setPiece(Ships s, int i, int j){
-        this.board[i][j].setToDraw(s.toString());
+    /**
+     * Assumes the piece to be set has a valid size and placement
+     * @param s
+     */
+    private boolean setPiece(Ship s){
+        int col = s.getHead()[0];
+        int row = s.getHead()[1];
+
+        boolean validHeadIndex = 
+            verifyIndex(row, col) && this.board[row][col].isEmpty();
+        
+        //Before we draw on the board, we need to make sure the ship fits
+        int lastRow = row + s.getDirection().getMovement()[1] * (s.getLength()-1);
+        int lastCol = col + s.getDirection().getMovement()[0] * (s.getLength()-1);
+        boolean shipFits = validHeadIndex && verifyIndex(lastRow, lastCol);
+
+        //Before we draw on the board, we need to make sure ships don't collide
+        boolean allSpotsValidAndEmpty = shipFits;
+        for(int i = 1; i < s.getLength() && allSpotsValidAndEmpty; i++){
+            col += s.getDirection().getMovement()[0];
+            row += s.getDirection().getMovement()[1];
+            allSpotsValidAndEmpty = this.board[row][col].isEmpty();
+        }
+
+        if(allSpotsValidAndEmpty){
+            //Reset the head pointers
+            col = s.getHead()[0];
+            row = s.getHead()[1];
+
+            //Draw the ship
+            this.board[row][col].setToDraw(s.getParts()[0]);
+            for(int i = 1; i < s.getLength(); i++){
+                col += s.getDirection().getMovement()[0];
+                row += s.getDirection().getMovement()[1];
+                this.board[row][col].setToDraw(s.getParts()[i]);
+            }
+            this.ships.add(s);
+        }
+        return allSpotsValidAndEmpty;
+    }
+
+    public void setRandomPiece(){
+        Random rand = new Random();
+        boolean pieceSet = false;
+        while(!pieceSet){
+            ShipType type = ShipType.values()[
+                rand.nextInt(ShipType.values().length)];
+            Direction dir = Direction.values()[
+                rand.nextInt(Direction.values().length)];
+            
+            int[] head = {rand.nextInt(boardSize), rand.nextInt(boardSize)};
+            Ship ship = new Ship(type, dir, head);
+            //System.out.println("Attempting a: " + type.getSymbol() + " facing " + dir.getName() + " at col " + head[0] + ", row " + head[1]);
+            pieceSet = setPiece(ship);
+        }
+    }
+
+    public void attack(int row, int col){
+        if(this.board[row][col].isEmpty()){
+            this.board[row][col].miss();
+        }else{
+            for(Ship s : ships){
+                //System.out.println("\tInside for each loop");
+                int startRow = s.getHead()[1];
+                int lastRow = startRow + 
+                    s.getDirection().getMovement()[1] * (s.getLength()-1);
+                
+                int startCol = s.getHead()[0];
+                int lastCol = startCol + 
+                    s.getDirection().getMovement()[0] * (s.getLength()-1);
+                
+                //System.out.println("\tAttacking: col " + col + ", row " + row);
+                //System.out.println("\tCol between " + startCol + " and " + lastCol);
+                //System.out.println("\tRow between " + startRow + " and " + lastRow);
+                int temp;
+                if(startCol > lastCol){
+                    temp = startCol;
+                    startCol = lastCol;
+                    lastCol = temp;
+                }
+                if(startRow > lastRow){
+                    temp = startRow;
+                    startRow = lastRow;
+                    lastRow = temp;
+                }
+                boolean validRow = startRow <= row && row <= lastRow;
+                boolean validCol = startCol <= col && col <= lastCol;
+                if(validRow && validCol && !s.isSunken()){
+                    //System.out.println("\t\tInside validation check");
+                    int index = Math.abs(startRow - row) + Math.abs(startCol - col);
+                    s.hit(index);
+                    this.board[row][col].setToDraw(s.getParts()[index]);
+                    if(s.isSunken()){
+                        System.out.println(s.getType().getType() + " Was Sunk!");
+                        checkEndCondition();
+                    }
+                }
+            }
+        }
+    }
+
+    private void checkEndCondition(){
+        int sunkenShips = 0;
+        for(Ship s : ships){
+            if(s.isSunken()){
+                sunkenShips++;
+            }
+        }
+        if(sunkenShips == ships.size()){
+            System.out.println("Player Loses!");
+        }
+    }
+
+    private boolean verifyIndex(int row, int col){
+        boolean validRow = 0 <= row && row < boardSize;
+        boolean validCol = 0 <= col && col < boardSize;
+        return validRow && validCol;
     }
 
     public String toString(){
@@ -67,7 +192,6 @@ public class Grid {
             }
             table.append(spacer);
         }
-
         return table.toString();
     }
 }
