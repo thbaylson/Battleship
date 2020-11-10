@@ -97,6 +97,7 @@ public class BattleClient implements MessageListener{
                             attacking(cmds);
                     } else if(cmds[0].toLowerCase().equals("/quit")){
                             i++;
+                            
                     } else if(cmds[0].toLowerCase().equals("/show")){
                             showing(cmds);
                     }
