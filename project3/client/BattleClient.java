@@ -82,6 +82,7 @@ public class BattleClient implements MessageListener{
                     buff = s.next();
                 }
             }
+            System.out.println(boardSize + " BEFORE");
             this.game = new Game(boardSize);
             this.boardSize--;
             System.out.println("To Join, Enter /join name");

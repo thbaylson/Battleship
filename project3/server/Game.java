@@ -19,6 +19,7 @@ public class Game {
     
     public Game(int boardSize){
         this.boardSize = boardSize;
+        System.out.println(boardSize + " GAME");
         players = new ArrayList<>();
     }
 
