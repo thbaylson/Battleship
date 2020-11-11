@@ -17,6 +17,7 @@ public class Game {
     private ArrayList<Grid> players;
     private int boardSize;
     private int shipAmt;
+    private ArrayList<String> username;
     
     public Game(int boardSize){
         this.boardSize = boardSize;
@@ -73,8 +74,11 @@ public class Game {
         }
     }
 
-    public void attack(int index, int row, int col){
-        players.get(index).attack(row, col);
+    public boolean attack(int index, int row, int col){
+        if(players.get(index).attack(row, col)){
+            return true;
+        }
+        return false;
     }
 
     public void clearBoard(int index){

@@ -98,10 +98,11 @@ public class BattleClient implements MessageListener{
                         game.addPlayer();
                     } else if(cmds[0].toLowerCase().equals("/play")){
                             this.playing = true;
+
                     } else if(cmds[0].toLowerCase().equals("/attack")){
                         if(this.playing){
                             if(turn == (names.indexOf(cmds[1]))){
-                                attacking(cmds);
+                                boolean value = attacking(cmds);
                                 if(turn == (names.size() - 1)){
                                     turn = 0;
                                 } else {
@@ -109,6 +110,13 @@ public class BattleClient implements MessageListener{
                                 }
                                 int index = names.indexOf(cmds[2]);
                                 System.out.println(game.getInactiveBoard(index));
+                                if(value){
+                                    activePlayers--;
+                                    names.remove(index);
+                                    if(activePlayers < 2){
+                                        this.playing = false;
+                                    }
+                                }
                             } else {
                                 System.out.println("Error: It is not Player: " + cmds[1] + " turn");
                             }
@@ -162,11 +170,15 @@ public class BattleClient implements MessageListener{
      * This functions purpose is to use the commands from the user to attack 
      * @param commands: Arguments include <person_req> <target> <pos> <pos>
      */
-    public void attacking(String[] commands){
+    public boolean attacking(String[] commands){
         int row = Integer.parseInt(commands[3]);
         int col = Integer.parseInt(commands[4]);
         int index = names.indexOf(commands[2]);
-        game.attack(index,row, col);
+        if(game.attack(index,row, col)){
+            System.out.println("Player " + commands[2] + " has lost.");
+            return true;
+        }
+        return false;
     }
 
     public boolean validCmd(String command){
