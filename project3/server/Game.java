@@ -46,6 +46,18 @@ public class Game {
         return inactive;
     }
 
+    /**
+     * Place pieces of a specific ShipType and Direction in a specific place
+     * on a specific player's board.
+     * @param type
+     * @param d
+     * @param row
+     * @param col
+     */
+    public void setPiece(int player, ShipType type, Direction d, int row, int col){
+        players.get(player).setPiece(type, d, row, col);
+    }
+
     private void setPieces(Grid g, int boardSize){
         //findBounds returns an array of size 2. 
         //Values can be assumed to be [a low bound int, a high bound int]
@@ -59,6 +71,10 @@ public class Game {
 
     public void attack(int index, int row, int col){
         players.get(index).attack(row, col);
+    }
+
+    public void clearBoard(int index){
+        players.get(index).clearBoard();
     }
 
     /**

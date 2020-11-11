@@ -34,19 +34,27 @@ public class BattleShipDriver {
 
         /** Testing without clients
         System.out.println("Size: " + boardSize);
+        
         Game game = new Game(boardSize);
+        game.addPlayer();
+        game.clearBoard(0);
+        game.setPiece(0, ShipType.Carrier, Direction.DOWN, 0, 3);
+
         System.out.println("\nOriginal Board: \n");
-        game.printBoards();
+        System.out.println(game.getActiveBoard(0));
+        
         System.out.println("Using args[0] to attack that many random locations:");
         for(int i = 0; i < Integer.parseInt(args[0]); i++){
             Random rand = new Random();
             int row = rand.nextInt(boardSize);
             int col = rand.nextInt(boardSize);
             //System.out.println("Attacking: col " + col + ", row " + row);
-            game.attack(row, col);
+            game.attack(0, row, col);
         }
+        
         System.out.println("\nAttacked Board: \n");
-        game.printBoards();
+        System.out.println(game.getActiveBoard(0));
         */
+
     }
 }
