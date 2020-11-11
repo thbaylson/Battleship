@@ -26,7 +26,7 @@ import java.util.*;
 public class BattleClient implements MessageListener{
 
     private InetAddress host;
-    private int port;
+    private int port, turn;
     private String username;
     private int boardSize;
     private Game game;
@@ -82,14 +82,14 @@ public class BattleClient implements MessageListener{
                     buff = s.next();
                 }
             }
-            System.out.println(boardSize + " BEFORE");
             this.game = new Game(boardSize);
             this.boardSize--;
+            this.turn = 0;
             System.out.println("To Join, Enter /join name");
            // Socket socket = new Socket(this.host, this.port);
             String command = s.nextLine();
             int i = 0;
-            while(i == 0){//CHANGE FOREVER LOOP
+            while(i == 0){//Not a forever loop bc quit changes i
             //while(!socket.isClosed()){
                 command = s.nextLine();
                 if(validCmd(command)){
@@ -97,17 +97,29 @@ public class BattleClient implements MessageListener{
                     if(cmds[0].toLowerCase().equals("/join")){
                         game.addPlayer();
                     } else if(cmds[0].toLowerCase().equals("/play")){
-                            
+                            this.playing = true;
                     } else if(cmds[0].toLowerCase().equals("/attack")){
-                            attacking(cmds);
-                            int index = names.indexOf(cmds[2]);
-                            System.out.println(game.getInactiveBoard(index));
+                        if(this.playing){
+                            if(turn == (names.indexOf(cmds[1]))){
+                                attacking(cmds);
+                                if(turn == (names.size() - 1)){
+                                    turn = 0;
+                                } else {
+                                    turn++;
+                                }
+                                int index = names.indexOf(cmds[2]);
+                                System.out.println(game.getInactiveBoard(index));
+                            } else {
+                                System.out.println("Error: It is not Player: " + cmds[1] + " turn");
+                            }
+                        } else {
+                            System.out.println("Error: Game has not been started yet.");
+                        }
                     } else if(cmds[0].toLowerCase().equals("/quit")){
                             if(activePlayers == 0){
                                 s.close();
                                 System.exit(0);
                             } 
-                            //FIX QUITTING FOR FIRST COMMAND
                     } else if(cmds[0].toLowerCase().equals("/show")){
                             showing(cmds);
                     }
@@ -184,7 +196,6 @@ public class BattleClient implements MessageListener{
         if(!playing){
             if(activePlayers >= 2){
                 System.out.println("Game can begin.");
-                this.playing = true;
             } else {
                 System.out.println("Error: Not enough players.");
             }
