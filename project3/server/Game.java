@@ -24,7 +24,7 @@ public class Game {
     }
 
     public void addPlayer(){
-        Grid g = new Grid();
+        Grid g = new Grid(boardSize);
         setPieces(g, boardSize);
         players.add(g);
     }
