@@ -66,9 +66,6 @@ public class Game {
     private void setPieces(Grid g, int boardSize){
         //findBounds returns an array of size 2. 
         //Values can be assumed to be [a low bound int, a high bound int]
-        int[] bounds = findBounds(boardSize);
-        Random rand = new Random();
-        int numPieces= rand.nextInt(bounds[1] - bounds[0] + 1) + bounds[0];
         for(int i = 0; i < this.shipAmt; i++){
             g.setRandomPiece();
         }

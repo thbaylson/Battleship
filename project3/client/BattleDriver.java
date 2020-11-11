@@ -1,5 +1,5 @@
 /**
- * Authors: Tyler Baylson & Dillion Gorlesky
+ * Authors: Tyler Baylson & Dillon Gorlesky
  * Instructor: Dr. Scott Barlowe
  * Date: November 2020
  */
@@ -17,13 +17,25 @@ import java.net.UnknownHostException;
  */
 public class BattleDriver {
 
-    public static void main(String[] args) throws UnknownHostException {
+    /**
+     * The purpose of this function is to act as the main for the entire 
+     * program to get command line arguments, handle improper input, then
+     * make a new BattleClient.
+     * @param String[]: Command line arguments including the port and hostname.
+     * @throws UnknownHostException: If host can't be located
+     * @throws NumberFormatException: If user input isn't integers for the port.
+     */
+    public static void main(String[] args) throws UnknownHostException, 
+        NumberFormatException {
         /**if(args.length < 3){
-            System.out.println("Usage: java client.BattleDriver hostname port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname 
+            port nickname");
             System.exit(1);
         }*/
         if(args.length < 2){
-            System.out.println("Usage: java client.BattleDriver hostname port size");//Change size back to nickname
+            System.out.println("Usage: java client.BattleDriver hostname "+
+                "port size");
+            //Change size back to nickname
             System.exit(1);
         }
         try{
@@ -36,11 +48,13 @@ public class BattleDriver {
             client.connect();
         } catch(NumberFormatException e){
             System.out.println("Invalid Port Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname "+
+                "port nickname");
             System.exit(1);
         } catch(UnknownHostException e){
             System.out.println("Unknown Host Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname "+
+                "port nickname");
             System.exit(1);
         }
     }

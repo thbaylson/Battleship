@@ -17,30 +17,36 @@ import java.net.UnknownHostException;
 import java.util.*;
 
 /**
- * BattleClient is one of the classes that implement the client-side logic of this client-server application. It
- * is responsible for creating a ConnectionAgent, reading input from the user, and sending that input to the
- * server via the ConnectionAgent. The class implements the MessageListener interface (i.e., it can "observe"
- * objects that are MessageSources). The class also extends MessageSource, indicating that it also plays the
+ * BattleClient is one of the classes that implement the client-side logic of 
+ * this client-server application. It is responsible for creating a 
+ * ConnectionAgent, reading input from the user, and sending that input to the
+ * server via the ConnectionAgent. The class implements the MessageListener 
+ * interface (i.e., it can "observe" objects that are MessageSources). The 
+ * class also extends MessageSource, indicating that it also plays the
  * role of "subject" in an instance of the observer pattern.
+ * @implements MessageListener: Interface some functions are used from
  */
 public class BattleClient implements MessageListener{
 
     private InetAddress host;
-    private int port, turn;
+    private int port, turn;//Port # and who's turn it is
     private String username;
-    private int boardSize;
-    private Game game;
-    private boolean playing;
-    private ArrayList<String> names;
-    private int activePlayers;
+    private int boardSize;//Size of board
+    private Game game;//Current game
+    private boolean playing;//If game is in progress
+    private ArrayList<String> names;//Names of currently playing players
+    private int activePlayers;//Number of active players
     private final String invalidCmd1 = "Valid Command are: \n\t /join <username>" +
                                 "\n\t /play \n\t /attack <username> <target> <[0-";
     private final String invalidCmd2 = "]>" +
                                 "\n\t /quit <name>\n\t /show <username> <target>\n";
 
     /** 
-     * This constructor is just for testing purposes to have 2 users on the same client for milestone 1
-     * 
+     * This constructor is just for testing purposes to have 2 users on the same 
+     * client for milestone 1
+     * @param String: Hostname given
+     * @param int: Port number given
+     * @throws UnknownHostException: If host given is invalid
      */
     public BattleClient(String hostname, int port) throws UnknownHostException{
         this.host = InetAddress.getByName(hostname);
@@ -48,12 +54,27 @@ public class BattleClient implements MessageListener{
         this.names = new ArrayList<String>();
     }
 
-    public BattleClient(String hostname, int port, String username) throws UnknownHostException{
+    /** 
+     * This constructor is just for testing purposes to have users on the same 
+     * client for milestone 1
+     * @param String: Hostname given
+     * @param int: Port number given
+     * @param String: Username of client
+     * @throws UnknownHostException: If host given is invalid
+     */
+    public BattleClient(String hostname, int port, String username) 
+        throws UnknownHostException{
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
     }
 
+    /**
+     * The purpose of this function is to be the meat and bones of the 
+     * program. It gets user input, makes sure the board size given is
+     * between 5-10, validates input, provides a usage message, and
+     * runs commands.
+     */
     public void connect(){
         Scanner s = new Scanner(System.in);
         boolean playing = false, properSize = false;
@@ -70,7 +91,8 @@ public class BattleClient implements MessageListener{
                 }               
             }
             while(!properSize){//Making sure its the right size
-                System.out.println("Not a proper size. Please enter a number between 5 and 10.");
+                System.out.println("Not a proper size. Please enter a " +
+                    "number between 5 and 10.");
                 if(s.hasNextInt()){
                     this.boardSize = s.nextInt();
                     if(this.boardSize < 5 || this.boardSize > 10){
@@ -82,7 +104,7 @@ public class BattleClient implements MessageListener{
                     buff = s.next();
                 }
             }
-            this.game = new Game(boardSize);
+            this.game = new Game(boardSize);//Starting new game
             this.boardSize--;
             this.turn = 0;
             System.out.println("To Join, Enter /join name");
@@ -95,35 +117,53 @@ public class BattleClient implements MessageListener{
                 if(validCmd(command)){
                     String[] cmds = command.split(" ");
                     if(cmds[0].toLowerCase().equals("/join")){
+                        //Adding players to game
                         game.addPlayer();
                     } else if(cmds[0].toLowerCase().equals("/play")){
+                        //Playing game
                             this.playing = true;
-
+                            if(activePlayers > 1){
+                                System.out.println("Player " + names.get(0) + ", it is your turn.");
+                            }
                     } else if(cmds[0].toLowerCase().equals("/attack")){
-                        if(this.playing){
+                        //Attacking someone
+                        if(this.playing){//makes sure game is in progress
                             if(turn == (names.indexOf(cmds[1]))){
+                                //if its player turn
                                 boolean value = attacking(cmds);
                                 if(turn == (names.size() - 1)){
                                     turn = 0;
                                 } else {
                                     turn++;
+                                    
                                 }
                                 int index = names.indexOf(cmds[2]);
                                 System.out.println(game.getInactiveBoard(index));
-                                if(value){
+                                if(value){//If someone has lost
                                     activePlayers--;
                                     names.remove(index);
-                                    if(activePlayers < 2){
+                                    game.removePlayerAt(index);
+                                    if(this.activePlayers < 2){
                                         this.playing = false;
                                     }
+                                } 
+                                if(activePlayers > 1){
+                                    System.out.println("Player " + names.get(turn) + ", it is your turn.");
+                                } else {
+                                    index = names.indexOf(cmds[1]);
+                                    game.removePlayerAt(index);
+                                    game.addPlayer();
                                 }
-                            } else {
-                                System.out.println("Error: It is not Player: " + cmds[1] + " turn");
+                            } else {//not player turn
+                                System.out.println("Error: It is not Player: " + 
+                                    cmds[1] + " turn");
                             }
-                        } else {
-                            System.out.println("Error: Game has not been started yet.");
+                        } else {//Game not begun
+                            System.out.println("Error: Game has not been " +
+                                "started yet.");
                         }
                     } else if(cmds[0].toLowerCase().equals("/quit")){
+                        //Player wants to surrender
                             if(activePlayers == 0){
                                 s.close();
                                 System.exit(0);
@@ -132,7 +172,9 @@ public class BattleClient implements MessageListener{
                             showing(cmds);
                     }
                 } else {
-                    System.out.println(invalidCmd1 + this.boardSize + "]> <[0-" + this.boardSize + invalidCmd2);
+                    //Printing usage message
+                    System.out.println(invalidCmd1 + this.boardSize + "]> <[0-" +
+                        this.boardSize + invalidCmd2);
                 }
             }
             //Send msg to other clients user quit
@@ -150,7 +192,8 @@ public class BattleClient implements MessageListener{
     }
 
     /**
-     * The purpose of this function is to handle any commands involving showing a board
+     * The purpose of this function is to handle any commands involving 
+     * showing a board
      * for the game
      * @param commands: Arguments include <person_req> <target>
      */
@@ -159,9 +202,11 @@ public class BattleClient implements MessageListener{
         String target = commands[2];
         if(request.equals(target)){
             int index = names.indexOf(request);
+            //Person is asking for their own board
             System.out.println(game.getActiveBoard(index));
         } else {
             int index = names.indexOf(target);
+            //Person is asking for someone elses board
             System.out.println(game.getInactiveBoard(index));
         }
     }
@@ -169,18 +214,26 @@ public class BattleClient implements MessageListener{
     /**
      * This functions purpose is to use the commands from the user to attack 
      * @param commands: Arguments include <person_req> <target> <pos> <pos>
+     * @return boolean: True if player lost, else false
      */
     public boolean attacking(String[] commands){
         int row = Integer.parseInt(commands[3]);
         int col = Integer.parseInt(commands[4]);
         int index = names.indexOf(commands[2]);
         if(game.attack(index,row, col)){
+            //Someone lost
             System.out.println("Player " + commands[2] + " has lost.");
             return true;
         }
         return false;
     }
 
+    /**
+     * The purpose of this function is to make sure the command entered 
+     * is a valid one
+     * @param String: String entered in console.
+     * @return boolean: If its a valid command or not
+     */
     public boolean validCmd(String command){
         String[] cmdList = command.split(" ");
         //cmdList[0] is user asking
@@ -204,6 +257,13 @@ public class BattleClient implements MessageListener{
         return false;
     }
 
+    /**
+     * The purpose of this function is to handle the commands
+     * related to playing, if there are enough players to play or
+     * if game is already in progress.
+     * @param String[]: Array of strings for the commands requested
+     * @return boolean: Valid command or not
+     */
     public boolean playCmd(String[] cmds){
         if(!playing){
             if(activePlayers >= 2){
@@ -217,9 +277,19 @@ public class BattleClient implements MessageListener{
         return true;
     }
 
+    /**
+     * The purpose of this function is to handle the commands
+     * related to quitting, decrementing players, if the person 
+     * trying to quit exists
+     * @param String[]: Array of strings for the commands requested
+     * @return boolean: Valid command or not
+     */
     public boolean quitCmd(String[] cmds){
         if(activePlayers == 0){
             return true;
+        }
+        if(cmds.length == 1){
+            return false;
         }
         for(String name : names){
             if(name.equals(cmds[1])){
@@ -234,15 +304,27 @@ public class BattleClient implements MessageListener{
                 return true;
             }
         }
-        System.out.println("Error: " + cmds[1] + " is not a player. Please retry.");
+        System.out.println("Error: " + cmds[1] + " is not a player. "+
+            "Please retry.");
         return false;
     }
 
+    /**
+     * The purpose of this function is to handle the commands
+     * related to joining. If the name is being used or game is in
+     * progress
+     * @param String[]: Array of strings for the commands requested
+     * @return boolean: Valid command or not
+     */
     public boolean joinCmd(String[] cmds){
         if(!playing){
+            if(cmds.length == 1){
+                return false;
+            }
             for(String name : names){
                 if(name.equals(cmds[1])){
-                    System.out.println("Error: " + cmds[1] + " is already in use. Please enter new name.");
+                    System.out.println("Error: " + cmds[1] + " is " +
+                        "already in use. Please enter new name.");
                     return false;
                 }
             }
@@ -254,6 +336,13 @@ public class BattleClient implements MessageListener{
         return true;
     }
 
+    /**
+     * The purpose of this function is to handle the commands
+     * related to showing. Showing someone elses board, your
+     * board, and if the names exist
+     * @param String[]: Array of strings for the commands requested
+     * @return boolean: Valid command or not
+     */
     public boolean showCmd(String[] cmds){
         boolean nameCheck = false;
         if(cmds.length >= 3){
@@ -264,7 +353,8 @@ public class BattleClient implements MessageListener{
                 }
             }
             if(!nameCheck){
-                System.out.println("Error: " + cmds[1] + " Player name not found. Please retry.");
+                System.out.println("Error: " + cmds[1] + " Player name not "+
+                    "found. Please retry.");
                 return false;
             }
             //Checking target name exists
@@ -275,7 +365,8 @@ public class BattleClient implements MessageListener{
                 }
             }
             if(!nameCheck){
-                System.out.println("Error: " + cmds[2] + " Player name not found. Please retry.");
+                System.out.println("Error: " + cmds[2] + " Player name not "+
+                    "found. Please retry.");
                 return false;
             }
             return true;
@@ -285,10 +376,18 @@ public class BattleClient implements MessageListener{
         }
     }
 
+    /**
+     * The purpose of this function is to handle the commands
+     * related to attacking. If correct number of arguments are given, 
+     * names exist, etc.
+     * @param String[]: Array of strings for the commands requested
+     * @return boolean: Valid command or not
+     */
     public boolean attackCmd(String[] cmds){
         boolean nameCheck = false;
         if(cmds.length < 5){
-            System.out.println("Error: Not enough arguments given for attack command.");
+            System.out.println("Error: Not enough arguments given for attack "+
+                "command.");
             return false;
         } else {
             //Checking first name exists
@@ -298,7 +397,8 @@ public class BattleClient implements MessageListener{
                 }
             }
             if(!nameCheck){
-                System.out.println("Error: " + cmds[1] + " Player name not found. Please retry.");
+                System.out.println("Error: " + cmds[1] + " Player name not "+
+                    "found. Please retry.");
                 return false;
             }
             //Checking target name exists
@@ -309,7 +409,8 @@ public class BattleClient implements MessageListener{
                 }
             }
             if(!nameCheck){
-                System.out.println("Error: " + cmds[2] + " Player name not found. Please retry.");
+                System.out.println("Error: " + cmds[2] + " Player name not "+
+                    "found. Please retry.");
                 return false;
             }
             try{
@@ -319,7 +420,8 @@ public class BattleClient implements MessageListener{
                     nameCheck = false;
                 }
                 if(!nameCheck){
-                    System.out.println("Error: " + cmds[3] + " Is not on the board.");
+                    System.out.println("Error: " + cmds[3] + " Is not on "+
+                        "the board.");
                     return false;
                 }
 
@@ -327,11 +429,13 @@ public class BattleClient implements MessageListener{
                     nameCheck = false;
                 }
                 if(!nameCheck){
-                    System.out.println("Error: " + cmds[4] + " Is not on the board.");
+                    System.out.println("Error: " + cmds[4] + " Is not on "+
+                        "the board.");
                     return false;
                 }
                 if(cmds[1].equals(cmds[2])){
-                    System.out.println("Error: Player " + cmds[1] + " cannot attack themselves.");
+                    System.out.println("Error: Player " + cmds[1] + 
+                        " cannot attack themselves.");
                     return false;
                 }
                 return true;
@@ -351,12 +455,17 @@ public class BattleClient implements MessageListener{
 
     }
 
+    /**
+     * Used to send messages to other observers
+     * @param msg: Message being sent to other clients.
+     */
     public void send(String msg){
 
     }
 
     /**
-     * Used to notify observers that the subject will not receive new messages; observers can
+     * Used to notify observers that the subject will not receive new messages;
+     *  observers can
      * deregister themselves.
      *
      * @param source The MessageSource that does not expect more messages.
