@@ -48,8 +48,23 @@ public class Grid {
     }
 
     /**
+     * 
+     * @param type
+     * @param d
+     * @param row
+     * @param col
+     * @return True if the piece was set, false if the piece was not set
+     */
+    public boolean setPiece(ShipType type, Direction d, int row, int col){
+        int[] head = {col, row};
+        Ship s = new Ship(type, d, head);
+        return setPiece(s);
+    }
+
+    /**
      * Assumes the piece to be set has a valid size and placement
      * @param s
+     * @return True if the piece was set, false if the piece was not set
      */
     private boolean setPiece(Ship s){
         int col = s.getHead()[0];
@@ -144,6 +159,14 @@ public class Grid {
                         checkEndCondition();
                     }
                 }
+            }
+        }
+    }
+
+    public void clearBoard(){
+        for(Square[] row : this.board){
+            for(Square s : row){
+                s.clear();;
             }
         }
     }
