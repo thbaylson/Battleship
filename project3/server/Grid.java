@@ -1,5 +1,5 @@
 /**
- * Authors: Tyler Baylson & Dillion Gorlesky
+ * Authors: Tyler Baylson & Dillon Gorlesky
  * Instructor: Dr. Scott Barlowe
  * Date: November 2020
  */
@@ -13,25 +13,33 @@ import java.util.Random;
  * Grid is the logic for a single board of Battleship.
  */
 public class Grid {
-    //Final Fields
+    /**The default size of a game board */
     private static final int DEFAULT_SIZE = 5;
     private ArrayList<String> players;
     
-    //Size of the board
+    /**Size of the board */
     private int boardSize;
     
-    //Connecting port
+    /**Connecting port */
     private String port;
     
-    //2-Dimensional array of squares representing the game board
+    /**2-Dimensional array of squares representing the game board */
     private Square[][] board;
 
+    /**The ships that have been placed on the game board */
     private ArrayList<Ship> ships;
 
+    /**
+     * Default constructor to initialize a grid when no parameters are passed
+     */
     public Grid(){
         this(DEFAULT_SIZE);
     }
 
+    /**
+     * Initializes a grid with the specified board size
+     * @param boardSize The size of the board
+     */
     public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
         this.ships = new ArrayList<>();
@@ -45,16 +53,21 @@ public class Grid {
         }
     }
 
+    /**
+     * Returns the size of the board
+     * @return The size of the board
+     */
     public int getBoardSize(){
         return this.boardSize;
     }
 
     /**
-     * 
-     * @param type
-     * @param d
-     * @param row
-     * @param col
+     * Attempts to place a piece on the game board. Will return true if the
+     * piece was set or false if the piece could not be set
+     * @param type The ShipType of the piece to be set
+     * @param d The Direction of the piece to be set
+     * @param row The row of the piece to be set
+     * @param col The column of the piece to be set
      * @return True if the piece was set, false if the piece was not set
      */
     public boolean setPiece(ShipType type, Direction d, int row, int col){
@@ -64,8 +77,9 @@ public class Grid {
     }
 
     /**
-     * Assumes the piece to be set has a valid size and placement
-     * @param s
+     * Attempts to place a piece on the game board. Will return true if the
+     * piece was set or false if the piece could not be set
+     * @param s The piece to be set on the game board
      * @return True if the piece was set, false if the piece was not set
      */
     private boolean setPiece(Ship s){
@@ -105,6 +119,10 @@ public class Grid {
         return allSpotsValidAndEmpty;
     }
 
+    /**
+     * Chooses a random ShipType, Direction, and starting row and column
+     * to place a new piece onto the game board
+     */
     public void setRandomPiece(){
         Random rand = new Random();
         boolean pieceSet = false;
@@ -121,12 +139,19 @@ public class Grid {
         }
     }
 
+    /**
+     * Invokes one of two methods on the Square representing the given row and
+     * column. Invokes Square.miss() if the Square is empty, otherwise will
+     * determine if there is a Ship occupying that Square. If there is a Ship
+     * occupying that Square, this method invokes Square.hit() of that Square
+     * @param row The row to attempt an attack on 
+     * @param col The column to attempt an attack on
+     */
     public boolean attack(int row, int col){
         if(this.board[row][col].isEmpty()){
             this.board[row][col].miss();
         }else{
             for(Ship s : ships){
-                //System.out.println("\tInside for each loop");
                 int startRow = s.getHead()[1];
                 int lastRow = startRow + 
                     s.getDirection().getMovement()[1] * (s.getLength()-1);
@@ -164,6 +189,9 @@ public class Grid {
         return false;
     }
 
+    /**
+     * Clears all the Square objects from the game board
+     */
     public void clearBoard(){
         for(Square[] row : this.board){
             for(Square s : row){
@@ -186,12 +214,23 @@ public class Grid {
         return false;
     }
 
+    /**
+     * Returns true if the given row and column exist within the bounds of the 
+     * game board, otherwise will return false
+     * @param row The row to be checked if valid
+     * @param col The column to be checked if valid
+     * @return True if the row/column pair represent valid indices on the baord
+     */
     private boolean verifyIndex(int row, int col){
         boolean validRow = 0 <= row && row < boardSize;
         boolean validCol = 0 <= col && col < boardSize;
         return validRow && validCol;
     }
 
+    /**
+     * The String representation of the board
+     * @return The String representation of the board
+     */
     public String toString(){
         //Build the spacer string
         StringBuilder spacer = new StringBuilder("\n   ");

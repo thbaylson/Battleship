@@ -1,5 +1,5 @@
 /**
- * Authors: Tyler Baylson & Dillion Gorlesky
+ * Authors: Tyler Baylson & Dillon Gorlesky
  * Instructor: Dr. Scott Barlowe
  * Date: November 2020
  */
@@ -163,8 +163,12 @@ public class BattleClient implements MessageListener{
                                 "started yet.");
                         }
                     } else if(cmds[0].toLowerCase().equals("/quit")){
+<<<<<<< HEAD
                         //Player wants to surrender
                             if(activePlayers == 0){
+=======
+                            if(activePlayers <= 1){
+>>>>>>> 79196284754cf358c12f78a6c090940cf8d3d990
                                 s.close();
                                 System.exit(0);
                             } 
@@ -285,8 +289,9 @@ public class BattleClient implements MessageListener{
      * @return boolean: Valid command or not
      */
     public boolean quitCmd(String[] cmds){
-        if(activePlayers == 0){
+        if(activePlayers <= 1){
             return true;
+<<<<<<< HEAD
         }
         if(cmds.length == 1){
             return false;
@@ -300,12 +305,24 @@ public class BattleClient implements MessageListener{
                 this.game.removePlayerAt(index);
                 if(activePlayers == 1){
                     playing = false;
+        }else if(cmds.length > 1){
+            for(String name : names){
+                if(name.equals(cmds[1])){
+                    System.out.println("Player: " + cmds[1] + " has surrendered.");
+                    int index = names.indexOf(cmds[1]);
+                    names.remove(cmds[1]);
+                    activePlayers--;
+                    this.game.removePlayerAt(index);
+                    if(activePlayers == 1){
+                        playing = false;
+                    }
+                    return true;
                 }
-                return true;
             }
         }
         System.out.println("Error: " + cmds[1] + " is not a player. "+
             "Please retry.");
+        System.out.println("Error: Not a valid player. Please retry.");
         return false;
     }
 
