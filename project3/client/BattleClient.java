@@ -319,6 +319,10 @@ public class BattleClient implements MessageListener{
                     System.out.println("Error: " + cmds[4] + " Is not on the board.");
                     return false;
                 }
+                if(cmds[1].equals(cmds[2])){
+                    System.out.println("Error: Player " + cmds[1] + " cannot attack themselves.");
+                    return false;
+                }
                 return true;
             } catch(NumberFormatException e){
                 return false;

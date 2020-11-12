@@ -20,6 +20,7 @@ public class Game {
     
     /**The size of all boards that will be used in this game */
     private int boardSize;
+    private int shipAmt;
     
     /**
      * Initialized a Game object with board sizes defined by boardSize
@@ -28,6 +29,9 @@ public class Game {
     public Game(int boardSize){
         this.boardSize = boardSize;
         players = new ArrayList<>();
+        int[] bounds = findBounds(boardSize);
+        Random rand = new Random();
+        this.shipAmt= rand.nextInt(bounds[1] - bounds[0] + 1) + bounds[0];
     }
 
     /**
@@ -98,7 +102,7 @@ public class Game {
         int[] bounds = findBounds(boardSize);
         Random rand = new Random();
         int numPieces= rand.nextInt(bounds[1] - bounds[0] + 1) + bounds[0];
-        for(int i = 0; i < numPieces; i++){
+        for(int i = 0; i < this.shipAmt; i++){
             g.setRandomPiece();
         }
     }
