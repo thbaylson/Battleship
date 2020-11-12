@@ -163,12 +163,8 @@ public class BattleClient implements MessageListener{
                                 "started yet.");
                         }
                     } else if(cmds[0].toLowerCase().equals("/quit")){
-<<<<<<< HEAD
                         //Player wants to surrender
                             if(activePlayers == 0){
-=======
-                            if(activePlayers <= 1){
->>>>>>> 79196284754cf358c12f78a6c090940cf8d3d990
                                 s.close();
                                 System.exit(0);
                             } 
@@ -291,7 +287,6 @@ public class BattleClient implements MessageListener{
     public boolean quitCmd(String[] cmds){
         if(activePlayers <= 1){
             return true;
-<<<<<<< HEAD
         }
         if(cmds.length == 1){
             return false;

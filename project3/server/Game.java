@@ -105,22 +105,11 @@ public class Game {
         }
     }
 
-<<<<<<< HEAD
     public boolean attack(int index, int row, int col){
         if(players.get(index).attack(row, col)){
             return true;
         }
         return false;
-=======
-    /**
-     * Attemps to attack the player at the given index at the given location
-     * @param index The player being attacked
-     * @param row The row of the attack
-     * @param col The column of the attack
-     */
-    public void attack(int index, int row, int col){
-        players.get(index).attack(row, col);
->>>>>>> 79196284754cf358c12f78a6c090940cf8d3d990
     }
 
     /**
