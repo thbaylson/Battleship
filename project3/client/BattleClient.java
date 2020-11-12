@@ -285,7 +285,7 @@ public class BattleClient implements MessageListener{
      * @return boolean: Valid command or not
      */
     public boolean quitCmd(String[] cmds){
-        if(activePlayers <= 1){
+        if(activePlayers == 0){
             return true;
         }
         if(cmds.length == 1){
@@ -300,26 +300,12 @@ public class BattleClient implements MessageListener{
                 this.game.removePlayerAt(index);
                 if(activePlayers == 1){
                     playing = false;
-                }else if(cmds.length > 1){
-                    for(String check : names){
-                        if(check.equals(cmds[1])){
-                            System.out.println("Player: " + cmds[1] + " has surrendered.");
-                            index = names.indexOf(cmds[1]);
-                            names.remove(cmds[1]);
-                            activePlayers--;
-                            this.game.removePlayerAt(index);
-                            if(activePlayers == 1){
-                               playing = false;
-                            }
-                            return true;
-                        }
-                    }
                 }
+                return true;
             }
         }
-        //System.out.println("Error: " + cmds[1] + " is not a player. "+
-            //"Please retry.");
-        //System.out.println("Error: Not a valid player. Please retry.");
+        System.out.println("Error: " + cmds[1] + " is not a player. "+
+            "Please retry.");
         return false;
     }
 
