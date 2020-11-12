@@ -1,5 +1,5 @@
 /**
- * Authors: Tyler Baylson & Dillion Gorlesky
+ * Authors: Tyler Baylson & Dillon Gorlesky
  * Instructor: Dr. Scott Barlowe
  * Date: November 2020
  */
