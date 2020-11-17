@@ -4,7 +4,7 @@
  * Date: November 2020
  */
 
-package client;
+package common;
 
 import java.io.PrintStream;
 import java.net.Socket;
