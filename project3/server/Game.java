@@ -21,6 +21,7 @@ public class Game {
     /**The size of all boards that will be used in this game */
     private int boardSize;
     private int shipAmt;
+    private ArrayList<String> username;
     
     /**
      * Initialized a Game object with board sizes defined by boardSize
@@ -99,22 +100,16 @@ public class Game {
     private void setPieces(Grid g, int boardSize){
         //findBounds returns an array of size 2. 
         //Values can be assumed to be [a low bound int, a high bound int]
-        int[] bounds = findBounds(boardSize);
-        Random rand = new Random();
-        int numPieces= rand.nextInt(bounds[1] - bounds[0] + 1) + bounds[0];
         for(int i = 0; i < this.shipAmt; i++){
             g.setRandomPiece();
         }
     }
 
-    /**
-     * Attemps to attack the player at the given index at the given location
-     * @param index The player being attacked
-     * @param row The row of the attack
-     * @param col The column of the attack
-     */
-    public void attack(int index, int row, int col){
-        players.get(index).attack(row, col);
+    public boolean attack(int index, int row, int col){
+        if(players.get(index).attack(row, col)){
+            return true;
+        }
+        return false;
     }
 
     /**

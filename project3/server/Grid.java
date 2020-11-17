@@ -15,6 +15,7 @@ import java.util.Random;
 public class Grid {
     /**The default size of a game board */
     private static final int DEFAULT_SIZE = 5;
+    private ArrayList<String> players;
     
     /**Size of the board */
     private int boardSize;
@@ -42,6 +43,7 @@ public class Grid {
     public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
         this.ships = new ArrayList<>();
+        this.players = new ArrayList<String>();
         this.boardSize = boardSize;
         this.board = new Square[boardSize][boardSize];
         for(int i = 0; i < boardSize; i++){
@@ -145,7 +147,7 @@ public class Grid {
      * @param row The row to attempt an attack on 
      * @param col The column to attempt an attack on
      */
-    public void attack(int row, int col){
+    public boolean attack(int row, int col){
         if(this.board[row][col].isEmpty()){
             this.board[row][col].miss();
         }else{
@@ -172,17 +174,19 @@ public class Grid {
                 boolean validRow = startRow <= row && row <= lastRow;
                 boolean validCol = startCol <= col && col <= lastCol;
                 if(validRow && validCol && !s.isSunken()){
-                    //System.out.println("\t\tInside validation check");
                     int index = Math.abs(startRow - row) + Math.abs(startCol - col);
                     s.hit(index);
                     this.board[row][col].setToDraw(s.getParts()[index]);
                     if(s.isSunken()){
                         System.out.println(s.getType().getType() + " Was Sunk!");
-                        checkEndCondition();
+                        if(checkEndCondition()){
+                            return true;
+                        }
                     }
                 }
             }
         }
+        return false;
     }
 
     /**
@@ -196,10 +200,7 @@ public class Grid {
         }
     }
 
-    /**
-     * Determines if all Ships belonging to this game board have sunken
-     */
-    private void checkEndCondition(){
+    private boolean checkEndCondition(){
         int sunkenShips = 0;
         for(Ship s : ships){
             if(s.isSunken()){
@@ -207,8 +208,10 @@ public class Grid {
             }
         }
         if(sunkenShips == ships.size()){
-            System.out.println("Player Loses!");
+            //System.out.println("Player Loses!");
+            return true;
         }
+        return false;
     }
 
     /**
