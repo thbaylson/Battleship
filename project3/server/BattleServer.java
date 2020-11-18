@@ -36,11 +36,13 @@ public class BattleServer implements MessageListener {
      * Constandtly listening
      */
     public void listen(){
-
+        //Recieve String from ConnectionAgent
+        //Check validity
+        //Perform game logic if input strings are valid
     }
 
     public void broadcast(String message){
-
+        //Send feedback to all clients
     }
 
     public boolean isClosed(){
