@@ -16,34 +16,36 @@ import java.net.UnknownHostException;
  * required.
  */
 public class BattleDriver {
+    private final static int DEFAULT_PORT = 5500;
 
     /**
      * The purpose of this function is to act as the main for the entire 
      * program to get command line arguments, handle improper input, then
      * make a new BattleClient.
-     * @param String[]: Command line arguments including the port and hostname.
+     * @param String[]: Command line arguments including the port, hostname, 
+     *      and username.
      * @throws UnknownHostException: If host can't be located
      * @throws NumberFormatException: If user input isn't integers for the port.
      */
     public static void main(String[] args) throws UnknownHostException, 
         NumberFormatException {
-        if(args.length < 3){
-            System.out.println("Usage: java client.BattleDriver hostname " +
-            "port nickname");
+        String userName = "";
+        int port = DEFAULT_PORT;
+        String hostname = "";
+        if(args.length < 2){
+            System.out.println("Usage: java client.BattleDriver <hostname> " +
+            "<port> <nickname>");
             System.exit(1);
         }
-        /**if(args.length < 2){
-            System.out.println("Usage: java client.BattleDriver hostname "+
-                "port size");
-            //Change size back to nickname
-            System.exit(1);
-        }*/
-        try{
-            String hostname = args[0];
-            int port = Integer.parseInt(args[1]);
-            String userName = args[2];
-            
-            //BattleClient client = new BattleClient(hostname, port);
+        try{ 
+            if(args.length == 2){
+                hostname = args[0];
+                userName = args[1];
+            } else {
+                hostname = args[0];
+                port = Integer.parseInt(args[1]);
+                userName = args[2];
+            }
             BattleClient client = new BattleClient(hostname, port, userName);
             client.connect();
         } catch(NumberFormatException e){

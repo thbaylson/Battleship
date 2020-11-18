@@ -27,8 +27,7 @@ public class PrintStreamMessageListener implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
-        // TODO Auto-generated method stub
-
+        this.out.println(message);
     }
 
     @Override
