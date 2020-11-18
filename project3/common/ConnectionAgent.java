@@ -16,7 +16,7 @@ import java.util.Scanner;
  * of the observer pattern. The class also implements the Runnable interface, indicating that it encapsulates
  * the logic associated with a Thread.
  */
-public class ConnectionAgent{
+public class ConnectionAgent extends MessageSource{
 
     private Socket socket;
     private Scanner in;
@@ -24,27 +24,33 @@ public class ConnectionAgent{
     private Thread thread;
 
     public ConnectionAgent(Socket socket){
+        this.thread = this.thread.currentThread();
         this.socket = socket;
     }
 
     public void sendMessage(String msg){
-
+        this.notifyReceipt(msg);
     }
 
     public boolean isConnected(){
-        return false;
+        return socket.isConnected();
+    }
+
+    /**
+     * 
+     */
+    public void close(){
+        //Close itself and the socket
     }
 
     /**
      * Runs in its own thread. Waits for messages, calls notifyReciept() when a 
      * message is received.
      */
-    public void close(){
-
-    }
-
     public void run(){
-
+        while(! this.thread.isInterrupted()){
+            //listen
+        }
     }
 
 }
