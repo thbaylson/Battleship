@@ -12,8 +12,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import common.MessageListener;
-import common.MessageSource;
+import common.*;
 
 /**
  * BattleServer is one of the classes that implement the server-side logic of
@@ -41,12 +40,16 @@ public class BattleServer implements MessageListener {
      * @throws IOException
      */
     public void listen() throws IOException {
+        System.out.println("Start of Listen");
         Socket socket = this.server.accept();
+        ConnectionAgent ca = new ConnectionAgent(socket);
+        ca.addMessageListener(this);
+        
+        //ca.addMessageListener(client);
 
-        InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-
-        BufferedReader br = new BufferedReader(isr);
-        System.out.println(br.readLine());
+        //InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+        //BufferedReader br = new BufferedReader(isr);
+        //System.out.println(br.readLine());
     }
 
     public void broadcast(String message){
@@ -59,7 +62,7 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
-        // TODO Auto-generated method stub
+        System.out.println(message);
 
     }
 

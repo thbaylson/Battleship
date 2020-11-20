@@ -18,7 +18,7 @@ import java.util.Scanner;
  * The class also implements the Runnable interface, indicating that it
  * encapsulates the logic associated with a Thread.
  */
-public class ConnectionAgent extends MessageSource {
+public class ConnectionAgent extends MessageSource implements Runnable{
 
     private Socket socket;
     private Scanner in;
@@ -26,6 +26,7 @@ public class ConnectionAgent extends MessageSource {
     private Thread thread;
 
     public ConnectionAgent(Socket socket) throws IOException {
+        super();
         this.thread = this.thread.currentThread();
         this.socket = socket;
         this.in = new Scanner(socket.getInputStream());
@@ -34,6 +35,10 @@ public class ConnectionAgent extends MessageSource {
 
     public void sendMessage(String msg){
         // Maybe use this.in or this.out here
+        System.out.println("HERE: " + msg);
+        this.in.nextLine();
+        System.out.println("IN?? : " + msg);
+        this.out.println(msg);
         this.notifyReceipt(msg);
     }
 
@@ -57,7 +62,9 @@ public class ConnectionAgent extends MessageSource {
     public void run(){
         String msg;
         while(! this.thread.isInterrupted()){
+            System.out.println("Thread Before NextLine");
             msg = this.in.nextLine();
+            System.out.println("Thread After NextLine");
             this.sendMessage(msg);
         }
     }
