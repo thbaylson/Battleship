@@ -7,8 +7,7 @@
 package client;
 
 import server.*;
-import common.MessageListener;
-import common.MessageSource;
+import common.*;
 import java.lang.*;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -30,290 +29,111 @@ public class BattleClient implements MessageListener{
 
     private InetAddress host;
     private int port;
+    private String echo;
+    private Scanner s;
+    private Socket socket;
+    private PrintStreamMessageListener printStream = new PrintStreamMessageListener(System.out);
     private String username;
-    private int boardSize;
-    private Game game;
-    private boolean playing;
-    private ArrayList<String> names;
-    private int activePlayers;
-    private final String invalidCmd1 = "Valid Command are: \n\t /join <username>" +
-                                "\n\t /play \n\t /attack <username> <target> <[0-";
-    private final String invalidCmd2 = "]>" +
-                                "\n\t /quit <name>\n\t /show <username> <target>\n";
+    private ConnectionAgent connection;
+    private final String invalidCmd1 = "Valid Command are: "+
+                                "\n\t /join <name>\n\t /play \n\t "+ 
+                                "/attack <target> <[row]> <[col]>" +
+                                "\n\t /quit\n\t /show <target>\n";
 
     /** 
-     * This constructor is just for testing purposes to have 2 users on the same client for milestone 1
-     * 
+     * This constructor is to initialize global variables passed from client
+     * driver.
+     * @param String: Hostname given
+     * @param int: Port number given
+     * @param String: Username of client
+     * @throws UnknownHostException: If host given is invalid
      */
-    public BattleClient(String hostname, int port) throws UnknownHostException{
-        this.host = InetAddress.getByName(hostname);
-        this.port = port;
-        this.names = new ArrayList<String>();
-    }
-
-    public BattleClient(String hostname, int port, String username) throws UnknownHostException{
+    public BattleClient(String hostname, int port, String username) 
+        throws UnknownHostException{
+        
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
     }
 
     public void connect(){
-        Scanner s = new Scanner(System.in);
-        boolean playing = false, properSize = false;
-        String buff;
-        this.activePlayers = 0;
+        this.s = new Scanner(System.in);
+        //Make new thread???????????????????????????????????????
+        String command = "";
         try{              
-            System.out.println("Enter board size (5-10): ");
-            if(s.hasNextInt()){//GETTING SIZE OF BOARD HERE
-                this.boardSize = s.nextInt();               
-                if(this.boardSize < 5 || this.boardSize > 10){
-                    properSize = false;
-                } else {
-                    properSize = true;  
-                }               
-            }
-            while(!properSize){//Making sure its the right size
-                System.out.println("Not a proper size. Please enter a number between 5 and 10.");
-                if(s.hasNextInt()){
-                    this.boardSize = s.nextInt();
-                    if(this.boardSize < 5 || this.boardSize > 10){
-                        properSize = false;
-                    } else {
-                        properSize = true;  
-                    }               
-                } else {
-                    buff = s.next();
-                }
-            }
-            this.game = new Game(boardSize);
-            this.boardSize--;
-            System.out.println("To Join, Enter /join name");
-           // Socket socket = new Socket(this.host, this.port);
-            String command = s.nextLine();
-            int i = 0;
-            while(i == 0){//CHANGE FOREVER LOOP
-            //while(!socket.isClosed()){
+            this.socket = new Socket(this.host, this.port);
+            //Making a connection agent 
+            this.connection = new ConnectionAgent(socket);
+            //SEND A join message HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            this.echo = "/join " + this.username;
+            send("/join " + this.username);
+            while(!command.toLowerCase().equals("/quit")){
                 command = s.nextLine();
-                if(validCmd(command)){
-                    String[] cmds = command.split(" ");
-                    if(cmds[0].toLowerCase().equals("/join")){
-                        game.addPlayer();
-                    } else if(cmds[0].toLowerCase().equals("/play")){
-                            
-                    } else if(cmds[0].toLowerCase().equals("/attack")){
-                            attacking(cmds);
-                            int index = names.indexOf(cmds[2]);
-                            System.out.println(game.getInactiveBoard(index));
-                    } else if(cmds[0].toLowerCase().equals("/quit")){
-                            if(activePlayers == 0){
-                                s.close();
-                                System.exit(0);
-                            } 
-                            //FIX QUITTING FOR FIRST COMMAND
-                    } else if(cmds[0].toLowerCase().equals("/show")){
-                            showing(cmds);
-                    }
+                //SEND COMMAND TO SERVER
+                String[] cmd = command.split(" ");
+                if(validLength(cmd)){
+                    //What happens if they hit enter and cmd[0] is null
+                    this.echo = command;
+                    send(command);
                 } else {
-                    System.out.println(invalidCmd1 + this.boardSize + "]> <[0-" + this.boardSize + invalidCmd2);
+                    System.out.println("Not enough arguments given.");
+                    //NOTE FOR LATER
+                    //THE WAY I HAVE IT SET UP IT CHECKS ARGUMENT LENGTHS BUT NOT VALID COMMANDS
+                    System.out.println(invalidCmd1);
                 }
+                //Players can send commands to show boards and such while it isnt their 
+                //turn but the server will check otehr commands such as attack to make sure its their turn
             }
             //Send msg to other clients user quit
-            //s.close();
-            //socket.close();
-        //} catch(IOException e){
-            //System.out.println("check");
+            //Close socket with sourceClosed()
+            connection.close();
+        } catch(IOException e){
+            s.close();
+            //connection.close();
+            System.out.println("check");
+            System.exit(1);
         } catch(NoSuchElementException e){ //DOING CTRL-C ON INPUT
             s.close();
+            //connection.close();
             System.exit(1);
         } catch(NumberFormatException e){
             s.close();
+            //connection.close();
             System.exit(1);
         }
     }
 
-    /**
-     * The purpose of this function is to handle any commands involving showing a board
-     * for the game
-     * @param commands: Arguments include <person_req> <target>
-     */
-    public void showing(String[] commands){
-        String request = commands[1];
-        String target = commands[2];
-        if(request.equals(target)){
-            int index = names.indexOf(request);
-            System.out.println(game.getActiveBoard(index));
-        } else {
-            int index = names.indexOf(target);
-            System.out.println(game.getInactiveBoard(index));
-        }
-    }
-
-    /**
-     * This functions purpose is to use the commands from the user to attack 
-     * @param commands: Arguments include <person_req> <target> <pos> <pos>
-     */
-    public void attacking(String[] commands){
-        int row = Integer.parseInt(commands[3]);
-        int col = Integer.parseInt(commands[4]);
-        int index = names.indexOf(commands[2]);
-        game.attack(index,row, col);
-    }
-
-    public boolean validCmd(String command){
-        String[] cmdList = command.split(" ");
-        //cmdList[0] is user asking
-        //cmdList[1] is command they wish to use
-        //if cmdList[3] its the target they want to use it on
-        //If cmdList[3] == /attack, cmdList[4] & cmdList[5] are coords
-        if(cmdList.length < 1){//Because /play is length 1
-            return false;
-        }
-        if(cmdList[0].toLowerCase().equals("/join")){//Join
-            return joinCmd(cmdList);
-        } else if(cmdList[0].toLowerCase().equals("/quit")){//QUIT
-            return quitCmd(cmdList);
-        } else if(cmdList[0].toLowerCase().equals("/play")){//PLAY
-            return playCmd(cmdList);
-        } else if(cmdList[0].toLowerCase().equals("/show")){//SHOW
-            return showCmd(cmdList);
-        } else if(cmdList[0].toLowerCase().equals("/attack")){//ATTACK
-            return attackCmd(cmdList);
-        }
-        return false;
-    }
-
-    public boolean playCmd(String[] cmds){
-        if(!playing){
-            if(activePlayers >= 2){
-                System.out.println("Game can begin.");
-                this.playing = true;
+    public boolean validLength(String[] cmd){
+        if(cmd[0].toLowerCase().equals("/attack")){
+            if(cmd.length == 4){
+                return true;
+            }
+        } else if(cmd[0].toLowerCase().equals("/play")){
+            if(cmd.length == 1){
+                return true;
+            }
+        } else if(cmd[0].toLowerCase().equals("/quit")){
+            if(cmd.length == 1){
+                this.username = "";
+                return true;
+            }
+        } else if(cmd[0].toLowerCase().equals("/show")){
+            if(cmd.length == 2){
+                return true;
+            }
+        } else if(cmd[0].toLowerCase().equals("/join")){
+            if(this.username.equals("")){
+                //They can't join a second time
+                if(cmd.length == 2){
+                    return true;
+                }
             } else {
-                System.out.println("Error: Not enough players.");
+                System.out.println("Error: Cannot join a game in which a player"+
+                    " is already playing.");
             }
-        } else {
-            System.out.println("Error: Game already started.");
         }
+        //Returns true if its an invalid command and server sends back useage message
         return true;
-    }
-
-    public boolean quitCmd(String[] cmds){
-        if(activePlayers == 0){
-            return true;
-        }
-        for(String name : names){
-            if(name.equals(cmds[1])){
-                System.out.println("Player: " + cmds[1] + " has surrendered.");
-                int index = names.indexOf(cmds[1]);
-                names.remove(cmds[1]);
-                activePlayers--;
-                this.game.removePlayerAt(index);
-                if(activePlayers == 1){
-                    playing = false;
-                }
-                return true;
-            }
-        }
-        System.out.println("Error: " + cmds[1] + " is not a player. Please retry.");
-        return false;
-    }
-
-    public boolean joinCmd(String[] cmds){
-        if(!playing){
-            for(String name : names){
-                if(name.equals(cmds[1])){
-                    System.out.println("Error: " + cmds[1] + " is already in use. Please enter new name.");
-                    return false;
-                }
-            }
-            activePlayers++;
-            names.add(cmds[1]);
-        } else { 
-            System.out.println("Error: Game already in progress. Can't join");
-        }
-        return true;
-    }
-
-    public boolean showCmd(String[] cmds){
-        boolean nameCheck = false;
-        if(cmds.length >= 3){
-            //Checking first name exists
-            for(String person : names){
-                if(cmds[1].equals(person)){
-                    nameCheck = true;
-                }
-            }
-            if(!nameCheck){
-                System.out.println("Error: " + cmds[1] + " Player name not found. Please retry.");
-                return false;
-            }
-            //Checking target name exists
-            nameCheck = false;
-            for(String target : names){
-                if(cmds[2].equals(target)){
-                    nameCheck = true;
-                }
-            }
-            if(!nameCheck){
-                System.out.println("Error: " + cmds[2] + " Player name not found. Please retry.");
-                return false;
-            }
-            return true;
-        } else {
-            System.out.println("Error: not enough arguments for show.");
-            return false;
-        }
-    }
-
-    public boolean attackCmd(String[] cmds){
-        boolean nameCheck = false;
-        if(cmds.length < 5){
-            System.out.println("Error: Not enough arguments given for attack command.");
-            return false;
-        } else {
-            //Checking first name exists
-            for(String person : names){
-                if(cmds[1].equals(person)){
-                    nameCheck = true;
-                }
-            }
-            if(!nameCheck){
-                System.out.println("Error: " + cmds[1] + " Player name not found. Please retry.");
-                return false;
-            }
-            //Checking target name exists
-            nameCheck = false;
-            for(String target : names){
-                if(cmds[2].equals(target)){
-                    nameCheck = true;
-                }
-            }
-            if(!nameCheck){
-                System.out.println("Error: " + cmds[2] + " Player name not found. Please retry.");
-                return false;
-            }
-            try{
-                int row = Integer.parseInt(cmds[3]);
-                int col = Integer.parseInt(cmds[4]);
-                if(!(row <= this.boardSize)){
-                    nameCheck = false;
-                }
-                if(!nameCheck){
-                    System.out.println("Error: " + cmds[3] + " Is not on the board.");
-                    return false;
-                }
-
-                if(!(col <= this.boardSize)){
-                    nameCheck = false;
-                }
-                if(!nameCheck){
-                    System.out.println("Error: " + cmds[4] + " Is not on the board.");
-                    return false;
-                }
-                return true;
-            } catch(NumberFormatException e){
-                return false;
-            }
-        }
     }
 
     /**
@@ -323,12 +143,15 @@ public class BattleClient implements MessageListener{
      * @param source  The source from which this message originated (if needed).
      */
     public void messageReceived(String msg, MessageSource source){
-
+        //There will be echo (same message sent to ConnectionAgent) received and printed again
+        if(!this.echo.equals(msg)){
+            printStream.messageReceived(msg, source);
+        }
     }
 
     public void send(String msg){
-
-    }
+        connection.sendMessage(msg);
+    }   
 
     /**
      * Used to notify observers that the subject will not receive new messages; observers can
@@ -338,6 +161,13 @@ public class BattleClient implements MessageListener{
      */
     @Override
     public void sourceClosed(MessageSource source) {
+        //ConnectionAgent is closing itself bc it doesn't know what its connected to
+        // and doesn't care
+        //The server will invoke my sourceClosed whenever I want to quit and let everyone else 
+        //know via broadcast msg I have surrendered
         
+        //Do all cleanup
+        this.s.close();
+        printStream.sourceClosed(source);
     }
 }
