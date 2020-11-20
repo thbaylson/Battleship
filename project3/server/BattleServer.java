@@ -36,17 +36,17 @@ public class BattleServer implements MessageListener {
     }
 
     /**
-     * Constandtly listening
+     * Constantly listening
      * 
      * @throws IOException
      */
     public void listen() throws IOException {
         Socket socket = this.server.accept();
 
-        InputStreamReader isr = new InputStreamReader(
-            socket.getInputStream());
+        InputStreamReader isr = new InputStreamReader(socket.getInputStream());
 
         BufferedReader br = new BufferedReader(isr);
+        System.out.println(br.readLine());
     }
 
     public void broadcast(String message){
