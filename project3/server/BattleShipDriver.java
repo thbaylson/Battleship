@@ -6,6 +6,7 @@
 
 package server;
 
+import java.io.IOException;
 import java.util.Random;
 
 /**
@@ -16,20 +17,27 @@ import java.util.Random;
  * assume square arrays
  */
 public class BattleShipDriver {
+
+    private static final int DEFAULT_BOARD_SIZE = 10;
+    private static final int DEFAULT_PORT = 5500;
     
     public static void main(String[] args){
-        int boardSize = 10;
-        if(args.length == 1){
-        } else {
-            try {
-                //System.out.println(boardSize);
-                boardSize = Integer.parseInt(args[1]);
-                if(boardSize < 2){
-                    boardSize = 10;
-                }
-            }catch(NumberFormatException e){
-                //TODO: print usage message
+        if(args.length == 2){
+            try{
+            int portNumber = Integer.parseInt(args[0]);
+            int boardSize = Integer.parseInt(args[1]);
+
+            BattleServer server = new BattleServer(portNumber, boardSize);
+            while(!server.isClosed()){
+                server.listen();
             }
+            }catch(NumberFormatException nfe){
+                //TODO: print usage
+            }catch(IOException ioe){
+                //Something went wrong with BattleServer
+            }
+        }else{
+            //TODO: print usage message
         }
 
         /** Testing without clients
