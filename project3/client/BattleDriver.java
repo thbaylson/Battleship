@@ -50,13 +50,11 @@ public class BattleDriver {
             client.connect();
         } catch(NumberFormatException e){
             System.out.println("Invalid Port Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname "+
-                "port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname port nickname");
             System.exit(1);
         } catch(UnknownHostException e){
             System.out.println("Unknown Host Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname "+
-                "port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname port nickname");
             System.exit(1);
         }
     }

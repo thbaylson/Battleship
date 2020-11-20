@@ -56,12 +56,6 @@ public class BattleClient implements MessageListener{
         this.username = username;
     }
 
-    /**
-     * The purpose of this function is to be the meat and bones of the 
-     * program. It gets user input, makes sure the board size given is
-     * between 5-10, validates input, provides a usage message, and
-     * runs commands.
-     */
     public void connect(){
         this.s = new Scanner(System.in);
         //Make new thread???????????????????????????????????????
@@ -95,16 +89,16 @@ public class BattleClient implements MessageListener{
             connection.close();
         } catch(IOException e){
             s.close();
-            connection.close();
+            //connection.close();
             System.out.println("check");
             System.exit(1);
         } catch(NoSuchElementException e){ //DOING CTRL-C ON INPUT
             s.close();
-            connection.close();
+            //connection.close();
             System.exit(1);
         } catch(NumberFormatException e){
             s.close();
-            connection.close();
+            //connection.close();
             System.exit(1);
         }
     }
@@ -155,17 +149,12 @@ public class BattleClient implements MessageListener{
         }
     }
 
-    /**
-     * Used to send messages to other observers
-     * @param msg: Message being sent to other clients.
-     */
     public void send(String msg){
         connection.sendMessage(msg);
     }   
 
     /**
-     * Used to notify observers that the subject will not receive new messages;
-     *  observers can
+     * Used to notify observers that the subject will not receive new messages; observers can
      * deregister themselves.
      *
      * @param source The MessageSource that does not expect more messages.
