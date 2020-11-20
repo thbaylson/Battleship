@@ -25,36 +25,30 @@ public class BattleDriver {
      * @throws UnknownHostException: If host can't be located
      * @throws NumberFormatException: If user input isn't integers for the port.
      */
-    public static void main(String[] args) throws UnknownHostException, 
-        NumberFormatException {
-        if(args.length < 3){
-            System.out.println("Usage: java client.BattleDriver hostname " +
-            "port nickname");
-            System.exit(1);
-        }
-        /**if(args.length < 2){
-            System.out.println("Usage: java client.BattleDriver hostname "+
-                "port size");
-            //Change size back to nickname
+    public static void main(String[] args) throws UnknownHostException {
+        /**if(args.length < 3){
+            System.out.println("Usage: java client.BattleDriver hostname port nickname");
             System.exit(1);
         }*/
+        if(args.length < 2){
+            System.out.println("Usage: java client.BattleDriver hostname port size");//Change size back to nickname
+            System.exit(1);
+        }
         try{
             String hostname = args[0];
             int port = Integer.parseInt(args[1]);
-            String userName = args[2];
+            //String userName = args[2];
             
-            //BattleClient client = new BattleClient(hostname, port);
-            BattleClient client = new BattleClient(hostname, port, userName);
+            BattleClient client = new BattleClient(hostname, port);
+            //BattleClient client = new BattleClient(hostname, port, userName);
             client.connect();
         } catch(NumberFormatException e){
             System.out.println("Invalid Port Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname "+
-                "port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname port nickname");
             System.exit(1);
         } catch(UnknownHostException e){
             System.out.println("Unknown Host Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname "+
-                "port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname port nickname");
             System.exit(1);
         }
     }
