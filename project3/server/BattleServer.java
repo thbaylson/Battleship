@@ -6,8 +6,11 @@
 
 package server;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 import common.MessageListener;
 import common.MessageSource;
@@ -34,11 +37,16 @@ public class BattleServer implements MessageListener {
 
     /**
      * Constandtly listening
+     * 
+     * @throws IOException
      */
-    public void listen(){
-        //Recieve String from ConnectionAgent
-        //Check validity
-        //Perform game logic if input strings are valid
+    public void listen() throws IOException {
+        Socket socket = this.server.accept();
+
+        InputStreamReader isr = new InputStreamReader(
+            socket.getInputStream());
+
+        BufferedReader br = new BufferedReader(isr);
     }
 
     public void broadcast(String message){
