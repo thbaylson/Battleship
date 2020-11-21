@@ -47,10 +47,13 @@ public class BattleServer implements MessageListener {
     public void listen() throws IOException {
         System.out.println("Start of Listen");
         Socket socket = this.server.accept();
+        System.out.println(socket.toString());
+        
         ConnectionAgent ca = new ConnectionAgent(socket);
         ca.addMessageListener(this);
         Thread thread = new Thread(ca);
         thread.run();
+        
         threads.add(thread);
         players.add(ca);
 

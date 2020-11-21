@@ -34,12 +34,11 @@ public class BattleClient implements MessageListener{
     private Socket socket;
     private PrintStreamMessageListener printStream = new PrintStreamMessageListener(System.out);
     private String username;
-    private ConnectionAgent connection;
+
     private final String invalidCmd1 = "Valid Command are: "+
                                 "\n\t /join <name>\n\t /play \n\t "+ 
                                 "/attack <target> <[row]> <[col]>" +
                                 "\n\t /quit\n\t /show <target>\n";
-
     /** 
      * This constructor is to initialize global variables passed from client
      * driver.
@@ -62,8 +61,13 @@ public class BattleClient implements MessageListener{
         String command = "";
         try{              
             this.socket = new Socket(this.host, this.port);
+            System.out.println(socket.toString());
+            
             //Making a connection agent 
-            this.connection = new ConnectionAgent(socket);
+            ConnectionAgent connection = new ConnectionAgent(socket);
+            //connection.addMessageListener(this);
+            Thread thread = new Thread(connection);
+            thread.run();
             //this.connection.addMessageListener(this);
 
             //Thread t = new Thread(this.connection);
@@ -91,6 +95,7 @@ public class BattleClient implements MessageListener{
             }
             //Send msg to other clients user quit
             //Close socket with sourceClosed()
+            thread.interrupt();
             connection.close();
         } catch(IOException e){
             s.close();
@@ -157,7 +162,7 @@ public class BattleClient implements MessageListener{
 
     public void send(String msg){
         System.out.println("Sending from client to connection agent");
-        connection.sendMessage(msg);
+        //connection.sendMessage(msg);
     }   
 
     /**
