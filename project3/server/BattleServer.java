@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 
 import common.*;
 
@@ -27,11 +28,15 @@ public class BattleServer implements MessageListener {
     private ServerSocket server;
     private int current;
     private Game game;
+    private ArrayList<ConnectionAgent> players;
+    private ArrayList<Thread> threads;
 
     public BattleServer(int port, int boardSize) throws IOException {
         this.port = port;
         this.server = new ServerSocket(port);
         this.game = new Game(boardSize);
+        this.players = new ArrayList<>();
+        this.threads = new ArrayList<>();
     }
 
     /**
@@ -44,6 +49,18 @@ public class BattleServer implements MessageListener {
         Socket socket = this.server.accept();
         ConnectionAgent ca = new ConnectionAgent(socket);
         ca.addMessageListener(this);
+        Thread thread = new Thread(ca);
+        thread.run();
+        threads.add(thread);
+        players.add(ca);
+
+        broadcast("A player has connected");
+
+        if(this.server.isClosed()){
+            for(Thread th : threads){
+                th.interrupt();
+            }
+        }
         
         //ca.addMessageListener(client);
 
@@ -53,7 +70,9 @@ public class BattleServer implements MessageListener {
     }
 
     public void broadcast(String message){
-        //Send feedback to all clients
+        for(ConnectionAgent player : players){
+            player.sendMessage(message);
+        }
     }
 
     public boolean isClosed(){

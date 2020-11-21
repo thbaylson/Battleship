@@ -150,9 +150,9 @@ public class BattleClient implements MessageListener{
     public void messageReceived(String msg, MessageSource source){
         //There will be echo (same message sent to ConnectionAgent) received and printed again
         System.out.println(msg);
-        if(!this.echo.equals(msg)){
-            printStream.messageReceived(msg, source);
-        }
+        //if(!this.echo.equals(msg)){
+        printStream.messageReceived(msg, source);
+        //}
     }
 
     public void send(String msg){

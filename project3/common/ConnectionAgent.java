@@ -62,10 +62,11 @@ public class ConnectionAgent extends MessageSource implements Runnable{
     public void run(){
         String msg;
         while(! this.thread.isInterrupted()){
-            System.out.println("Thread Before NextLine");
-            msg = this.in.nextLine();
-            System.out.println("Thread After NextLine");
-            this.sendMessage(msg);
+            if(this.in.hasNext()){
+                msg = this.in.nextLine();
+                notifyReceipt(msg);
+            }
+            if(this.out.)
         }
     }
 
