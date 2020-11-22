@@ -24,19 +24,33 @@ public class BattleShipDriver {
     public static void main(String[] args){
         if(args.length == 2){
             try{
-            int portNumber = Integer.parseInt(args[0]);
-            int boardSize = Integer.parseInt(args[1]);
+                int portNumber = Integer.parseInt(args[0]);
+                int boardSize = Integer.parseInt(args[1]);
 
-            BattleServer server = new BattleServer(portNumber, boardSize);
-            while(!server.isClosed()){
-                server.listen();
-            }
+                BattleServer server = new BattleServer(portNumber, boardSize);
+                while(!server.isClosed()){
+                    server.listen();
+                }
             }catch(NumberFormatException nfe){
                 //TODO: print usage
             }catch(IOException ioe){
                 //Something went wrong with BattleServer
             }
-        }else{
+        }else if(args.length == 1){
+            try{
+                int portNumber = Integer.parseInt(args[0]);
+                int boardSize = DEFAULT_BOARD_SIZE;
+
+                BattleServer server = new BattleServer(portNumber, boardSize);
+                while(!server.isClosed()){
+                    server.listen();
+                }
+            }catch(NumberFormatException nfe){
+                //TODO: print usage
+            }catch(IOException ioe){
+                //Something went wrong with BattleServer
+            }
+        } else {
             //TODO: print usage message
         }
 

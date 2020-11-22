@@ -27,7 +27,6 @@ public class ConnectionAgent extends MessageSource implements Runnable{
 
     public ConnectionAgent(Socket socket) throws IOException {
         super();
-        this.thread = this.thread.currentThread();
         this.socket = socket;
         this.in = new Scanner(socket.getInputStream());
         this.out = new PrintStream(socket.getOutputStream());
@@ -60,7 +59,8 @@ public class ConnectionAgent extends MessageSource implements Runnable{
      */
     public void run(){
         String msg;
-        while(! this.thread.isInterrupted()){
+        this.thread = this.thread.currentThread();
+        while(!this.thread.isInterrupted()){
             if(this.in.hasNext()){
                 msg = this.in.nextLine();
                 notifyReceipt(msg);

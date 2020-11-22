@@ -7,7 +7,9 @@
 package client;
 
 import server.*;
-import common.*;
+import common.ConnectionAgent;
+import common.MessageListener;
+import common.MessageSource;
 import java.lang.*;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -35,6 +37,8 @@ public class BattleClient implements MessageListener{
     private PrintStreamMessageListener printStream = new PrintStreamMessageListener(System.out);
     private String username;
 
+    private ArrayList<Thread> threads;
+    private ConnectionAgent connection;
     private final String invalidCmd1 = "Valid Command are: "+
                                 "\n\t /join <name>\n\t /play \n\t "+ 
                                 "/attack <target> <[row]> <[col]>" +
@@ -53,25 +57,25 @@ public class BattleClient implements MessageListener{
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
+        this.threads = new ArrayList<>();
     }
 
-    public void connect(){
+    public void connect() {
         this.s = new Scanner(System.in);
-        //Make new thread???????????????????????????????????????
         String command = "";
         try{              
             this.socket = new Socket(this.host, this.port);
             System.out.println(socket.toString());
             
             //Making a connection agent 
-            ConnectionAgent connection = new ConnectionAgent(socket);
-            //connection.addMessageListener(this);
-            Thread thread = new Thread(connection);
-            thread.run();
-            //this.connection.addMessageListener(this);
 
-            //Thread t = new Thread(this.connection);
-            //t.start();
+            this.connection = new ConnectionAgent(socket);
+            Thread t = new Thread(this.connection);
+            t.start();
+
+            /**Thread t = new Thread(connection);
+            t.start();
+            threads.add(t);*/
             
             //SEND A join message HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             this.echo = "/join " + this.username;
@@ -80,16 +84,12 @@ public class BattleClient implements MessageListener{
                 command = s.nextLine();
                 //SEND COMMAND TO SERVER
                 String[] cmd = command.split(" ");
-                if(validLength(cmd)){
                     //What happens if they hit enter and cmd[0] is null
                     this.echo = command;
                     send(command);
-                } else {
-                    System.out.println("Not enough arguments given.");
-                    //NOTE FOR LATER
-                    //THE WAY I HAVE IT SET UP IT CHECKS ARGUMENT LENGTHS BUT NOT VALID COMMANDS
-                    System.out.println(invalidCmd1);
-                }
+                    //I got rid of the if statement here because they can still send 
+                    // other invalid commands to server
+
                 //Players can send commands to show boards and such while it isnt their 
                 //turn but the server will check otehr commands such as attack to make sure its their turn
             }
@@ -114,35 +114,38 @@ public class BattleClient implements MessageListener{
     }
 
     public boolean validLength(String[] cmd){
-        if(cmd[0].toLowerCase().equals("/attack")){
-            if(cmd.length == 4){
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/play")){
-            if(cmd.length == 1){
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/quit")){
-            if(cmd.length == 1){
-                this.username = "";
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/show")){
-            if(cmd.length == 2){
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/join")){
-            if(this.username.equals("")){
-                //They can't join a second time
+        if(cmd.length > 0){
+            if(cmd[0].toLowerCase().equals("/attack")){
+                if(cmd.length == 4){
+                   return true;
+                }
+            } else if(cmd[0].toLowerCase().equals("/play")){
+               if(cmd.length == 1){
+                    return true;
+                }
+            } else if(cmd[0].toLowerCase().equals("/quit")){
+                if(cmd.length == 1){
+                    this.username = "";
+                    return true;
+                }
+            } else if(cmd[0].toLowerCase().equals("/show")){
                 if(cmd.length == 2){
                     return true;
                 }
-            } else {
-                System.out.println("Error: Cannot join a game in which a player"+
-                    " is already playing.");
+            } else if(cmd[0].toLowerCase().equals("/join")){
+                if(this.username.equals("")){
+                    //They can't join a second time
+                    if(cmd.length == 2){
+                        return true;
+                    }
+                } else {
+                    System.out.println("Error: Cannot join a game in which a player"+
+                        " is already playing.");
+                }
             }
+            //Returns true if its an invalid command and server sends back useage message
+            return true;
         }
-        //Returns true if its an invalid command and server sends back useage message
         return true;
     }
 
@@ -156,6 +159,7 @@ public class BattleClient implements MessageListener{
         //There will be echo (same message sent to ConnectionAgent) received and printed again
         System.out.println(msg);
         //if(!this.echo.equals(msg)){
+            //THERE IS NO ECHO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         printStream.messageReceived(msg, source);
         //}
     }
