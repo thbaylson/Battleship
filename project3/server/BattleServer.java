@@ -49,15 +49,10 @@ public class BattleServer implements MessageListener {
         Socket socket = this.server.accept();
         ConnectionAgent ca = new ConnectionAgent(socket);
 
-        //System.out.println(ca.getSocket());
-        //System.out.println(socket);
-        //System.out.println(ca.getSocket().equals(socket));
-
         ca.addMessageListener(this);
         Thread thread = new Thread(ca);
         thread.start();
         threads.add(thread);
-        players.add(ca);
 
         broadcast("A player has connected");
 
@@ -66,12 +61,6 @@ public class BattleServer implements MessageListener {
                 th.interrupt();
             }
         }
-        
-        //ca.addMessageListener(client);
-
-        //InputStreamReader isr = new InputStreamReader(socket.getInputStream());
-        //BufferedReader br = new BufferedReader(isr);
-        //System.out.println(br.readLine());
     }
 
     public void broadcast(String message){
@@ -86,7 +75,7 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
-        System.out.println(message);
+        System.out.println(message + " msg");
 
     }
 

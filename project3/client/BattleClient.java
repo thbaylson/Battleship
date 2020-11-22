@@ -7,7 +7,9 @@
 package client;
 
 import server.*;
-import common.*;
+import common.ConnectionAgent;
+import common.MessageListener;
+import common.MessageSource;
 import java.lang.*;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -58,17 +60,16 @@ public class BattleClient implements MessageListener{
         this.threads = new ArrayList<>();
     }
 
-    public void connect(){
+    public void connect() {
         this.s = new Scanner(System.in);
         String command = "";
         try{              
             this.socket = new Socket(this.host, this.port);
             //Making a connection agent 
-            ConnectionAgent ca = new ConnectionAgent(socket);
+            this.connection = new ConnectionAgent(socket);
+            Thread t = new Thread(this.connection);
+            t.start();
 
-            System.out.println(ca.socket);
-            System.out.println(socket);
-            //System.out.println(ca.getSocket().equals(socket));
             /**Thread t = new Thread(connection);
             t.start();
             threads.add(t);*/
@@ -80,16 +81,12 @@ public class BattleClient implements MessageListener{
                 command = s.nextLine();
                 //SEND COMMAND TO SERVER
                 String[] cmd = command.split(" ");
-                if(validLength(cmd)){
                     //What happens if they hit enter and cmd[0] is null
                     this.echo = command;
                     send(command);
-                } else {
-                    System.out.println("Not enough arguments given.");
-                    //NOTE FOR LATER
-                    //THE WAY I HAVE IT SET UP IT CHECKS ARGUMENT LENGTHS BUT NOT VALID COMMANDS
-                    System.out.println(invalidCmd1);
-                }
+                    //I got rid of the if statement here because they can still send 
+                    // other invalid commands to server
+
                 //Players can send commands to show boards and such while it isnt their 
                 //turn but the server will check otehr commands such as attack to make sure its their turn
             }
@@ -158,6 +155,7 @@ public class BattleClient implements MessageListener{
         //There will be echo (same message sent to ConnectionAgent) received and printed again
         System.out.println(msg);
         //if(!this.echo.equals(msg)){
+            //THERE IS NO ECHO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         printStream.messageReceived(msg, source);
         //}
     }
