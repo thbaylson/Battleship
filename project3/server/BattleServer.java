@@ -48,9 +48,14 @@ public class BattleServer implements MessageListener {
         System.out.println("Start of Listen");
         Socket socket = this.server.accept();
         ConnectionAgent ca = new ConnectionAgent(socket);
+
+        //System.out.println(ca.getSocket());
+        //System.out.println(socket);
+        //System.out.println(ca.getSocket().equals(socket));
+
         ca.addMessageListener(this);
         Thread thread = new Thread(ca);
-        thread.run();
+        thread.start();
         threads.add(thread);
         players.add(ca);
 

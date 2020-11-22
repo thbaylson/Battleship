@@ -34,6 +34,7 @@ public class BattleClient implements MessageListener{
     private Socket socket;
     private PrintStreamMessageListener printStream = new PrintStreamMessageListener(System.out);
     private String username;
+    private ArrayList<Thread> threads;
     private ConnectionAgent connection;
     private final String invalidCmd1 = "Valid Command are: "+
                                 "\n\t /join <name>\n\t /play \n\t "+ 
@@ -54,20 +55,23 @@ public class BattleClient implements MessageListener{
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
+        this.threads = new ArrayList<>();
     }
 
     public void connect(){
         this.s = new Scanner(System.in);
-        //Make new thread???????????????????????????????????????
         String command = "";
         try{              
             this.socket = new Socket(this.host, this.port);
             //Making a connection agent 
-            this.connection = new ConnectionAgent(socket);
-            //this.connection.addMessageListener(this);
+            ConnectionAgent ca = new ConnectionAgent(socket);
 
-            //Thread t = new Thread(this.connection);
-            //t.start();
+            System.out.println(ca.socket);
+            System.out.println(socket);
+            //System.out.println(ca.getSocket().equals(socket));
+            /**Thread t = new Thread(connection);
+            t.start();
+            threads.add(t);*/
             
             //SEND A join message HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
             this.echo = "/join " + this.username;
@@ -109,35 +113,38 @@ public class BattleClient implements MessageListener{
     }
 
     public boolean validLength(String[] cmd){
-        if(cmd[0].toLowerCase().equals("/attack")){
-            if(cmd.length == 4){
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/play")){
-            if(cmd.length == 1){
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/quit")){
-            if(cmd.length == 1){
-                this.username = "";
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/show")){
-            if(cmd.length == 2){
-                return true;
-            }
-        } else if(cmd[0].toLowerCase().equals("/join")){
-            if(this.username.equals("")){
-                //They can't join a second time
+        if(cmd.length > 0){
+            if(cmd[0].toLowerCase().equals("/attack")){
+                if(cmd.length == 4){
+                   return true;
+                }
+            } else if(cmd[0].toLowerCase().equals("/play")){
+               if(cmd.length == 1){
+                    return true;
+                }
+            } else if(cmd[0].toLowerCase().equals("/quit")){
+                if(cmd.length == 1){
+                    this.username = "";
+                    return true;
+                }
+            } else if(cmd[0].toLowerCase().equals("/show")){
                 if(cmd.length == 2){
                     return true;
                 }
-            } else {
-                System.out.println("Error: Cannot join a game in which a player"+
-                    " is already playing.");
+            } else if(cmd[0].toLowerCase().equals("/join")){
+                if(this.username.equals("")){
+                    //They can't join a second time
+                    if(cmd.length == 2){
+                        return true;
+                    }
+                } else {
+                    System.out.println("Error: Cannot join a game in which a player"+
+                        " is already playing.");
+                }
             }
+            //Returns true if its an invalid command and server sends back useage message
+            return true;
         }
-        //Returns true if its an invalid command and server sends back useage message
         return true;
     }
 

@@ -20,17 +20,19 @@ import java.util.Scanner;
  */
 public class ConnectionAgent extends MessageSource implements Runnable{
 
-    private Socket socket;
+    public Socket socket;
     private Scanner in;
     private PrintStream out;
     private Thread thread;
 
     public ConnectionAgent(Socket socket) throws IOException {
         super();
-        this.thread = this.thread.currentThread();
+        System.out.println("here1");
+        
         this.socket = socket;
         this.in = new Scanner(socket.getInputStream());
         this.out = new PrintStream(socket.getOutputStream());
+        System.out.println("here");
     }
 
     public void sendMessage(String msg){
@@ -61,12 +63,13 @@ public class ConnectionAgent extends MessageSource implements Runnable{
      */
     public void run(){
         String msg;
-        while(! this.thread.isInterrupted()){
+        System.out.println("check me");
+        this.thread = this.thread.currentThread();
+        while(!this.thread.isInterrupted()){
             if(this.in.hasNext()){
                 msg = this.in.nextLine();
                 notifyReceipt(msg);
             }
-            if(this.out.)
         }
     }
 
