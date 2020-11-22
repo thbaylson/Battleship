@@ -95,7 +95,7 @@ public class BattleClient implements MessageListener{
             }
             //Send msg to other clients user quit
             //Close socket with sourceClosed()
-            thread.interrupt();
+            t.interrupt();
             connection.close();
         } catch(IOException e){
             s.close();
