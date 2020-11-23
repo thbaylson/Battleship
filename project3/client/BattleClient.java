@@ -6,11 +6,9 @@
 
 package client;
 
-import server.*;
 import common.ConnectionAgent;
 import common.MessageListener;
 import common.MessageSource;
-import java.lang.*;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -27,14 +25,13 @@ import java.util.*;
  * role of "subject" in an instance of the observer pattern.
  * @implements MessageListener: Interface some functions are used from
  */
-public class BattleClient implements MessageListener{
+public class BattleClient extends MessageSource implements MessageListener{
 
     private InetAddress host;
     private int port;
-    private String echo;
     private Scanner s;
     private Socket socket;
-    private PrintStreamMessageListener printStream = new PrintStreamMessageListener(System.out);
+    private PrintStreamMessageListener printStream;
     private String username;
 
     private ArrayList<Thread> threads;
@@ -58,6 +55,8 @@ public class BattleClient implements MessageListener{
         this.port = port;
         this.username = username;
         this.threads = new ArrayList<>();
+        this.printStream = new PrintStreamMessageListener(System.out);
+        this.addMessageListener(printStream);
     }
 
     public void connect() {
@@ -75,19 +74,41 @@ public class BattleClient implements MessageListener{
             //SEND A join message
             send("/join " + this.username);
             while(!command.toLowerCase().equals("/quit")){
-                command = s.nextLine();
-                //SEND COMMAND TO SERVER
-                String[] cmd = command.split(" ");
-                //What happens if they hit enter and cmd[0] is null
-                send(command);
+                while(connection.isConnected()){
+                    command = s.nextLine();
+                    //SEND COMMAND TO SERVER
+                    //String[] cmd = command.split(" ");
+                    //What happens if they hit enter and cmd[0] is null
+                    send(command);
 
-                //Players can send commands to show boards and such while it isnt their 
-                //turn but the server will check otehr commands such as attack to make sure its their turn
+                    //Players can send commands to show boards and such while it isnt their 
+                    //turn but the server will check otehr commands such as attack to make sure its their turn
+                }
+                command = s.nextLine();
+                String[] cmd = command.split(" ");
+                
+                if(cmd[0].equals("/join")){
+                    this.username = cmd[1];
+                
+                    t.interrupt();
+                    connection.close();
+                    socket.close();
+
+                    this.socket = new Socket(this.host, this.port);
+                    this.connection = new ConnectionAgent(socket);
+                    connection.addMessageListener(this);
+                    t = new Thread(this.connection);
+                    t.start();
+
+                    send("/join " + this.username);
+                }
             }
             //Send msg to other clients user quit
             //Close socket with sourceClosed()
             t.interrupt();
             connection.close();
+            this.closeMessageSource();
+
         } catch(IOException e){
             s.close();
             //connection.close();
@@ -170,7 +191,6 @@ public class BattleClient implements MessageListener{
         //know via broadcast msg I have surrendered
         
         //Do all cleanup
-        this.s.close();
-        printStream.sourceClosed(source);
+        //this.s.close();
     }
 }

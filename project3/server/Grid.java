@@ -15,13 +15,9 @@ import java.util.Random;
 public class Grid {
     /**The default size of a game board */
     private static final int DEFAULT_SIZE = 5;
-    private ArrayList<String> players;
     
     /**Size of the board */
     private int boardSize;
-    
-    /**Connecting port */
-    private String port;
     
     /**2-Dimensional array of squares representing the game board */
     private Square[][] board;
@@ -43,7 +39,6 @@ public class Grid {
     public Grid(int boardSize) {
         //Creating a new board of squares with symbol S to test formatting
         this.ships = new ArrayList<>();
-        this.players = new ArrayList<String>();
         this.boardSize = boardSize;
         this.board = new Square[boardSize][boardSize];
         for(int i = 0; i < boardSize; i++){
@@ -90,8 +85,8 @@ public class Grid {
             verifyIndex(row, col) && this.board[row][col].isEmpty();
         
         //Before we draw on the board, we need to make sure the ship fits
-        int lastRow = row + s.getDirection().getMovement()[1] * (s.getLength()-1);
-        int lastCol = col + s.getDirection().getMovement()[0] * (s.getLength()-1);
+        int lastRow = row+s.getDirection().getMovement()[1]*(s.getLength()-1);
+        int lastCol = col+s.getDirection().getMovement()[0]*(s.getLength()-1);
         boolean shipFits = validHeadIndex && verifyIndex(lastRow, lastCol);
 
         //Before we draw on the board, we need to make sure ships don't collide
@@ -146,6 +141,8 @@ public class Grid {
      * occupying that Square, this method invokes Square.hit() of that Square
      * @param row The row to attempt an attack on 
      * @param col The column to attempt an attack on
+     * @return True if the grid contains only sunken ships after the attack,
+     * otherwise returns false
      */
     public boolean attack(int row, int col){
         if(this.board[row][col].isEmpty()){
@@ -179,9 +176,7 @@ public class Grid {
                     this.board[row][col].setToDraw(s.getParts()[index]);
                     if(s.isSunken()){
                         System.out.println(s.getType().getType() + " Was Sunk!");
-                        if(checkEndCondition()){
-                            return true;
-                        }
+                        return checkEndCondition();
                     }
                 }
             }
@@ -224,6 +219,19 @@ public class Grid {
     private boolean verifyIndex(int row, int col){
         boolean validRow = 0 <= row && row < boardSize;
         boolean validCol = 0 <= col && col < boardSize;
+        return validRow && validCol;
+    }
+
+    /**
+     * Returns true if the given row and column exist within the bounds of the 
+     * given size, otherwise will return false
+     * @param row The row to be checked if valid
+     * @param col The column to be checked if valid
+     * @return True if the row/column pair represent valid indices
+     */
+    public static boolean verifyIndex(int size, int row, int col){
+        boolean validRow = 0 <= row && row < size;
+        boolean validCol = 0 <= col && col < size;
         return validRow && validCol;
     }
 
