@@ -31,9 +31,14 @@ public class BattleShipDriver {
                     server.listen();
                 }
             }catch(NumberFormatException nfe){
-                //TODO: print usage
+                System.out.println("Invalid Port or Boardsize. Please Retry.");
+                System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
+                System.exit(1);
             }catch(IOException ioe){
-                //Something went wrong with BattleServer
+                System.out.println("Error: Something went wrong with BattleShipDriver," +
+                   " please retry.");
+                System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
+                System.exit(1);
             }
         }else if(args.length == 1){
             try{
@@ -45,12 +50,19 @@ public class BattleShipDriver {
                     server.listen();
                 }
             }catch(NumberFormatException nfe){
-                //TODO: print usage
+                System.out.println("Invalid Port or Boardsize. Please Retry.");
+                System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
+                System.exit(1);
             }catch(IOException ioe){
-                //Something went wrong with BattleServer
+                System.out.println("Error: Something went wrong with BattleShipDriver," +
+                   " please retry.");
+                System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
+                System.exit(1);
             }
         } else {
-            //TODO: print usage message
+            System.out.println("Error: Not enough command line arguments given.");
+            System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
+            System.exit(1);
         }
     }
 }

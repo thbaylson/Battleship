@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 
 import common.*;
 
@@ -30,6 +31,10 @@ public class BattleServer implements MessageListener {
     private ArrayList<ConnectionAgent> players;
     private ArrayList<String> playerNames;
     private ArrayList<Thread> threads;
+    private final String invalidCmd1 = "Valid Commands are: \n\t /join <username>" +
+                                "\n\t /play \n\t /attack <target> <[0-";
+    private final String invalidCmd2 = "]>" +
+                                "\n\t /quit <name>\n\t /show <target>\n";
 
     public BattleServer(int port, int boardSize) throws IOException {
         this.boardSize = boardSize;
@@ -52,7 +57,7 @@ public class BattleServer implements MessageListener {
         
         ConnectionAgent ca = new ConnectionAgent(socket);
         ca.addMessageListener(this);
-        
+        System.out.println("--------------------------Start-----------------------");
         Thread thread = new Thread(ca);
         thread.start();
         threads.add(thread);
@@ -102,12 +107,13 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
+        //System.out.println(message + " Message Gotten");
         handleMessage(message, source);
     }
 
     private void handleMessage(String message, MessageSource source){
         String[] cmdList = message.split(" ");
-
+        int size = this.boardSize - 1;
         if(cmdList.length > 0){
             if(cmdList[0].toLowerCase().equals("/join")){
                 //JOIN
@@ -124,7 +130,13 @@ public class BattleServer implements MessageListener {
             } else if(playing && cmdList[0].toLowerCase().equals("/attack")){
                 //ATTACK
                 attackCmd(cmdList, source);
+            } else {
+                //SEND BACK USAGE MESSAGE
+                sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2, source);
             }
+        } else {
+            //Send back usage message
+            sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2, source);
         }
     }
 
@@ -144,12 +156,26 @@ public class BattleServer implements MessageListener {
 
     private void quitCmd(String[] cmds, MessageSource source){
         //TODO: CLOSE THE SOURCE
-        for(String name : playerNames){
-            if(name.equals(cmds[1])){
-                int player = playerNames.indexOf(cmds[1]);
-                this.playing = activePlayers != 1;
-                broadcast(" has surrendered!");
-                removePlayer(player);
+        int size = this.boardSize - 1;
+        //We have to do for loop bc we get a ConcurrentModificationException
+        //Here when using a for-each loop (not sure exactly why though)
+        boolean first = true;
+        for(int i = 0; i < playerNames.size(); i++){
+            String name = playerNames.get(i);
+            if(cmds.length > 1){
+                if(name.equals(cmds[1])){
+                    int player = playerNames.indexOf(cmds[1]);
+                    broadcast(playerNames.get(player) + " has surrendered!");
+                    this.playing = activePlayers != 1;
+                    removePlayer(player);
+                }
+            } 
+            if(first){
+                if(cmds.length == 1){
+                    //Send back usage message
+                    sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2, source);
+                    first = false;
+                }
             }
         }
     }
@@ -167,7 +193,7 @@ public class BattleServer implements MessageListener {
                 this.activePlayers++;
                 this.game.addPlayer();
                 this.playerNames.add(cmds[1]);
-
+                System.out.println(cmds[1] + " Name joining");
                 sendMessage("Welcome " + cmds[1] + "!", source);
                 broadcastExcept(cmds[1] + " has connected!", source);
             }
@@ -204,17 +230,23 @@ public class BattleServer implements MessageListener {
 
     private void attackCmd(String[] cmds, MessageSource source){
         boolean validName = false;
+        int pos = 0;
         if(cmds.length == 4){
-            
+            int i = 0;
             //Checking first name exists
             for(String person : playerNames){
                 if(cmds[1].equals(person)){
+                    pos = i;
                     validName = true;
                 }
+                i++;
             }
             
             //Check the dimensions
             if(validName){
+                if(players.get(pos).equals(source)){
+                    sendMessage("Error: Cannot attack yourself.", source);
+                }
                 try{
                     int request = playerNames.indexOf(cmds[1]);
                     int requester = players.indexOf(source);
@@ -273,17 +305,17 @@ public class BattleServer implements MessageListener {
      * @param player The index of a player to be removed
      */
     private void removePlayer(int player){
-        try {
-            players.get(player).close();
-            players.remove(player);
+        //try {
+            //players.get(player).close();
+            //players.remove(player);
             playerNames.remove(player);
             this.game.removePlayerAt(player);
             this.activePlayers--;
             //TODO: invoke sourceClosed()?
-        } catch (IOException e) {
+        //} catch (IOException e) {
             //Exceptions on this level should be printed to the server
-            System.out.println("Error removing player");
-        }
+           // System.out.println("Error removing player");
+        //}
     }
 
     private void checkWinConditions(){
@@ -314,7 +346,6 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void sourceClosed(MessageSource source) {
-        // TODO Auto-generated method stub
-
+        //TODO SourceClosed
     }
 }

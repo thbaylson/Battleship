@@ -76,20 +76,22 @@ public class BattleClient extends MessageSource implements MessageListener{
             while(!command.toLowerCase().equals("/quit")){
                 while(connection.isConnected()){
                     command = s.nextLine();
-                    //SEND COMMAND TO SERVER
-                    //String[] cmd = command.split(" ");
-                    //What happens if they hit enter and cmd[0] is null
-                    send(command);
-
+                    //Making sure command isn't /join while username is used.
+                    //And also forcing other players to quit that isn't themselves
+                    if(!checkCmd(command)){
+                        //SEND COMMAND TO SERVER 
+                        send(command);
+                    }
                     //Players can send commands to show boards and such while it isnt their 
                     //turn but the server will check otehr commands such as attack to make sure its their turn
                 }
                 command = s.nextLine();
                 String[] cmd = command.split(" ");
+                System.out.println("Here: " + command);
                 
                 if(cmd[0].equals("/join")){
                     this.username = cmd[1];
-                
+                    System.out.println("Check inside");
                     t.interrupt();
                     connection.close();
                     socket.close();
@@ -112,7 +114,9 @@ public class BattleClient extends MessageSource implements MessageListener{
         } catch(IOException e){
             s.close();
             //connection.close();
-            System.out.println("check");
+            System.out.println("Error: An IOException has occurred." +
+                " Make sure the command line arguments you inputted " +
+                " are valid and retry.");
             System.exit(1);
         } catch(NoSuchElementException e){ //DOING CTRL-C ON INPUT
             s.close();
@@ -120,9 +124,48 @@ public class BattleClient extends MessageSource implements MessageListener{
             System.exit(1);
         } catch(NumberFormatException e){
             s.close();
+            System.out.println("Number format exception");
             //connection.close();
             System.exit(1);
         }
+    }
+
+    public boolean checkCmd(String command){
+        String[] cmd = command.split(" ");
+        if(cmd[0].toLowerCase().equals("/join")){
+            if(this.username != null){
+                System.out.println("Error: Cannot join a new player with used client.");
+                return true;
+            } else {
+                if(cmd.length > 1){
+                    this.username = cmd[1];
+                    try {
+                        this.connection = new ConnectionAgent(socket);
+                        connection.addMessageListener(this);
+                    } catch (IOException e) {
+                        System.out.println("Error: An Error occurred while trying to rejoin." +
+                            " Please retry.");
+                    }
+                    
+                    Thread t = new Thread(this.connection);
+                    t.start();
+                    return false;
+                }
+            }
+        } else if(cmd[0].toLowerCase().equals("/quit")){
+            if(cmd.length != 1){
+                if(!cmd[1].equals(this.username)){
+                    System.out.println("Error: Cannot quit another player" +
+                        " that is not yourself.");
+                        return true;
+                } else {
+                    this.username = null;
+                    connection.removeMessageListener(this);
+                    this.connection = null;
+                }
+            }
+        }
+        return false;
     }
 
     public boolean validLength(String[] cmd){
@@ -173,7 +216,6 @@ public class BattleClient extends MessageSource implements MessageListener{
     }
 
     public void send(String msg){
-        //System.out.println("Sending from client to connection agent");
         connection.sendMessage(msg);
     }   
 
