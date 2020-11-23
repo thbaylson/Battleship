@@ -58,10 +58,6 @@ public class BattleServer implements MessageListener {
         threads.add(thread);
         players.add(ca);
 
-        broadcast("A player has connected!");
-
-        sendMessage("Hello Player " + players.indexOf(ca)+1, ca);
-
         if(this.server.isClosed()){
             for(Thread th : threads){
                 th.interrupt();
@@ -69,16 +65,33 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    public void broadcast(String message){
+    /**
+     * 
+     * @param message
+     */
+    private void broadcast(String message){
         for(ConnectionAgent player : players){
             player.sendMessage(message);
         }
     }
 
-    public void sendMessage(String message, MessageSource source){
-        for(ConnectionAgent ca : players){
-            if(ca.equals(source)){
-                ca.sendMessage(message);
+    /**
+     * Broadcasts a message to every connection except the given connection
+     * @param message
+     * @param player
+     */
+    private void broadcastExcept(String message, MessageSource source){
+        for(ConnectionAgent player : players){
+            if(!player.equals(source)){
+                player.sendMessage(message);
+            }
+        }
+    }
+
+    private void sendMessage(String message, MessageSource source){
+        for(ConnectionAgent player : players){
+            if(player.equals(source)){
+                player.sendMessage(message);
             }
         }
     }
@@ -92,10 +105,10 @@ public class BattleServer implements MessageListener {
         handleMessage(message, source);
     }
 
-    public void handleMessage(String message, MessageSource source){
+    private void handleMessage(String message, MessageSource source){
         String[] cmdList = message.split(" ");
-        //Because /play is length 1
-        if(cmdList.length > 1){
+
+        if(cmdList.length > 0){
             if(cmdList[0].toLowerCase().equals("/join")){
                 //JOIN
                 joinCmd(cmdList, source);
@@ -115,10 +128,11 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    public void playCmd(String[] cmds, MessageSource source){
+    private void playCmd(String[] cmds, MessageSource source){
         if(!playing){
             if(activePlayers >= 2){
-                System.out.println("Game start!");
+                broadcast(playerNames.get(getPlayerBySource(source)) + " has started the game!");
+                broadcast(playerNames.get(0) + " it is your turn!");
                 this.playing = true;
             } else {
                 sendMessage("There are not enough players to start the game.", source);
@@ -128,7 +142,7 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    public void quitCmd(String[] cmds, MessageSource source){
+    private void quitCmd(String[] cmds, MessageSource source){
         //TODO: CLOSE THE SOURCE
         for(String name : playerNames){
             if(name.equals(cmds[1])){
@@ -140,7 +154,7 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    public void joinCmd(String[] cmds, MessageSource source){
+    private void joinCmd(String[] cmds, MessageSource source){
         if(!playing){
             boolean validName = true;
             for(String name : playerNames){
@@ -153,13 +167,16 @@ public class BattleServer implements MessageListener {
                 this.activePlayers++;
                 this.game.addPlayer();
                 this.playerNames.add(cmds[1]);
+
+                sendMessage("Welcome " + cmds[1] + "!", source);
+                broadcastExcept(cmds[1] + " has connected!", source);
             }
         } else { 
             sendMessage("The game is already in progress. You cannot join.", source);
         }
     }
 
-    public void showCmd(String[] cmds, MessageSource source){
+    private void showCmd(String[] cmds, MessageSource source){
         boolean validName = false;
         if(cmds.length == 2){
             //Checking first name exists
@@ -185,7 +202,7 @@ public class BattleServer implements MessageListener {
         }    
     }
 
-    public void attackCmd(String[] cmds, MessageSource source){
+    private void attackCmd(String[] cmds, MessageSource source){
         boolean validName = false;
         if(cmds.length == 4){
             
@@ -214,7 +231,18 @@ public class BattleServer implements MessageListener {
                             //Prevent players from attacking themselves
                             if(request != requester){
                                 boolean playerDefeated = this.game.attack(request, row, col);
-                                sendMessage(this.game.getInactiveBoard(request), source);
+                                sendMessage("Attack Report:\n" + 
+                                    this.game.getInactiveBoard(request), source);
+
+                                broadcastExcept(playerNames.get(requester) +
+                                    " has attacked!", players.get(request));
+
+                                sendMessage(playerNames.get(requester) + 
+                                    " has attacked you!\nAttack Report:\n" +
+                                    this.game.getActiveBoard(request), players.get(request));
+
+                                broadcast(playerNames.get((requester + 1) % players.size()) 
+                                    + " it is your turn!");
                                 
                                 if(playerDefeated){
                                     broadcast(playerNames.get(request) + " has been defeated!");
@@ -223,7 +251,8 @@ public class BattleServer implements MessageListener {
                                 checkWinConditions();
                             }
                         }else{
-                            sendMessage("It is not your turn. Please be patient.", source);
+                            sendMessage("It is currently " + playerNames.get(
+                                this.game.getTurn() % players.size()) + "'s turn.", source);
                         }
                     } else{
                         sendMessage("Usage: //attack [player_name] [row] [column]", source);
@@ -266,6 +295,21 @@ public class BattleServer implements MessageListener {
             this.game = new Game(boardSize);
             this.game.addPlayer();
         }
+    }
+
+    /**
+     * Returns the index of the player who has the given source
+     * @param source
+     * @return
+     */
+    private int getPlayerBySource(MessageSource source){
+        int index = -1;
+        for(int i = 0; i < players.size(); i++){
+            if(players.get(i).equals(source)){
+                index = i;
+            }
+        }
+        return index;
     }
 
     @Override
