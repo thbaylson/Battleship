@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import common.*;
 
@@ -32,10 +33,13 @@ public class BattleServer implements MessageListener {
     private boolean playing;
     private int boardSize;
     private ArrayList<ConnectionAgent> players;
+    private HashMap<String, ArrayList<Object>> playerMap;
+    private ArrayList<Grid> playerGrids;
     private ArrayList<String> playerNames;
     private ArrayList<Thread> threads;
 
     public BattleServer(int port, int boardSize) throws IOException {
+        this.playerMap = new HashMap<>();
         this.port = port;
         this.boardSize = boardSize;
         this.server = new ServerSocket(port);
@@ -53,32 +57,39 @@ public class BattleServer implements MessageListener {
      * @throws IOException
      */
     public void listen() throws IOException {
-        System.out.println("Start of Listen");
-        Socket socket = this.server.accept();
-        System.out.println(socket.toString());
+        Socket socket = this.server.accept();   
         
         ConnectionAgent ca = new ConnectionAgent(socket);
-
         ca.addMessageListener(this);
+        
         Thread thread = new Thread(ca);
-
         thread.start();
-      
         threads.add(thread);
         players.add(ca);
 
         broadcast("A player has connected");
+
+        sendMessage("Hello Player: " + players.indexOf(ca), ca);
 
         if(this.server.isClosed()){
             for(Thread th : threads){
                 th.interrupt();
             }
         }
+        //((ConnectionAgent)playerMap.get(playerMap.values().toArray()[i]).get(2)).sendMessage(message);
     }
 
     public void broadcast(String message){
         for(ConnectionAgent player : players){
             player.sendMessage(message);
+        }
+    }
+
+    public void sendMessage(String message, MessageSource source){
+        for(ConnectionAgent ca : players){
+            if(ca.equals(source)){
+                ca.sendMessage(message);
+            }
         }
     }
 
@@ -94,17 +105,41 @@ public class BattleServer implements MessageListener {
     }
 
     public void handleMessage(String message, MessageSource source){
-        int i = 0;
-        for(ConnectionAgent c : players){
-            if(c.equals(source)){
-                System.out.println("I am user Number: " + i);
-                if(validCmd(message)){
+        System.out.println("I am user Number: " + players.indexOf(source));
+        if(validCmd(message)){
+            String[] cmdList = message.split(" ");
+            if(cmdList[0].toLowerCase().equals("/join")){
+                /**playerMap.put(cmdList[1], new ArrayList<>());
+                ArrayList<Object> objs  = new ArrayList<>();
+                objs.add(cmdList[1]);
+                objs.add(source);
+                playerMap.get(cmdList[1]).add(objs);
+                ((ConnectionAgent) source).sendMessage(message);*/
 
+                //playerNames.add(cmdList[1]);
+                this.game.addPlayer();
+            } else if(cmdList[0].toLowerCase().equals("/show")){//SHOW
+                int request = playerNames.indexOf(cmdList[1]);
+                int requester = players.indexOf(source);
+                if(request == requester){
+                    sendMessage(this.game.getActiveBoard(request), source);//SEND THIS 
                 } else {
-
+                    sendMessage(this.game.getInactiveBoard(requester), source);
+                }
+            } else if(cmdList[0].toLowerCase().equals("/attack")){//ATTACK
+                int request = playerNames.indexOf(cmdList[1]);
+                int requester = players.indexOf(source);
+                if(request == requester){
+                    //sendMessage(this.game.getActiveBoard(request), source);//SEND Error
+                } else {
+                    int row = Integer.parseInt(cmdList[2]);
+                    int col = Integer.parseInt(cmdList[3]);
+                    this.game.attack(request, row, col);
+                    sendMessage(this.game.getInactiveBoard(request), source);
                 }
             }
-            i++;
+        } else {
+
         }
     }
 

@@ -65,30 +65,21 @@ public class BattleClient implements MessageListener{
         String command = "";
         try{              
             this.socket = new Socket(this.host, this.port);
-            System.out.println(socket.toString());
             
             //Making a connection agent 
-
             this.connection = new ConnectionAgent(socket);
+            connection.addMessageListener(this);
             Thread t = new Thread(this.connection);
             t.start();
-
-            /**Thread t = new Thread(connection);
-            t.start();
-            threads.add(t);*/
             
-            //SEND A join message HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            this.echo = "/join " + this.username;
+            //SEND A join message
             send("/join " + this.username);
             while(!command.toLowerCase().equals("/quit")){
                 command = s.nextLine();
                 //SEND COMMAND TO SERVER
                 String[] cmd = command.split(" ");
-                    //What happens if they hit enter and cmd[0] is null
-                    this.echo = command;
-                    send(command);
-                    //I got rid of the if statement here because they can still send 
-                    // other invalid commands to server
+                //What happens if they hit enter and cmd[0] is null
+                send(command);
 
                 //Players can send commands to show boards and such while it isnt their 
                 //turn but the server will check otehr commands such as attack to make sure its their turn
@@ -156,17 +147,13 @@ public class BattleClient implements MessageListener{
      * @param source  The source from which this message originated (if needed).
      */
     public void messageReceived(String msg, MessageSource source){
-        //There will be echo (same message sent to ConnectionAgent) received and printed again
-        System.out.println(msg);
-        //if(!this.echo.equals(msg)){
-            //THERE IS NO ECHO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //System.out.println(msg + " msg received");
         printStream.messageReceived(msg, source);
-        //}
     }
 
     public void send(String msg){
-        System.out.println("Sending from client to connection agent");
-        //connection.sendMessage(msg);
+        //System.out.println("Sending from client to connection agent");
+        connection.sendMessage(msg);
     }   
 
     /**

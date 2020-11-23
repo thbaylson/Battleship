@@ -30,12 +30,11 @@ public class ConnectionAgent extends MessageSource implements Runnable{
         this.socket = socket;
         this.in = new Scanner(socket.getInputStream());
         this.out = new PrintStream(socket.getOutputStream());
-        System.out.println("End of Constructor");
     }
 
     public void sendMessage(String msg){
         // Maybe use this.in or this.out here
-        System.out.println("HERE: " + msg);
+        //System.out.println("HERE: " + msg);
         this.out.println(msg);
         //this.notifyReceipt(msg);
     }
