@@ -16,8 +16,6 @@ public class Square {
     //If square holds piece
     private boolean isEmpty;
 
-    //Add one for length of piece maybe?
-
     /**
      * Initializes the square object and clears itself
      */
@@ -42,14 +40,14 @@ public class Square {
     }
 
     /**
-     * Set sthe string representation to be a single 'X' character
+     * Set the string representation to be a single 'X' character
      */
     public void miss(){
         this.piece = "X";
     }
 
     /**
-     * Set sthe string representation to be the given String
+     * Set the string representation to be the given string
      * @param symbol The symbol that represents the state of this Square
      */
     public void setToDraw(String symbol){
@@ -58,7 +56,7 @@ public class Square {
     }
 
     /**
-     * Set sthe string representation to be the given String
+     * Set the string representation to be the given string
      * @param symbol The symbol that represents the state of this Square
      */
     public void setToDraw(char symbol){
@@ -66,7 +64,7 @@ public class Square {
     }
 
     /**
-     * The String representation of a Square
+     * The string representation of a Square
      */
     public String toString(){
         return this.piece;

@@ -50,6 +50,7 @@ public class ConnectionAgent extends MessageSource implements Runnable{
     public void close() throws IOException {
         //Close itself and the socket
         this.socket.close();
+        this.closeMessageSource();
     }
 
     /**

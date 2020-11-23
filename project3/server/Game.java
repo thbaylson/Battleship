@@ -20,14 +20,19 @@ public class Game {
     
     /**The size of all boards that will be used in this game */
     private int boardSize;
+    
+    /**The amount of ships each player will have */
     private int shipAmt;
-    private ArrayList<String> username;
+    
+    /**Keeps track of the current turn. A turn passes when an attack occurs */
+    private int turnNumber;
     
     /**
      * Initialized a Game object with board sizes defined by boardSize
      * @param boardSize The size of all boards that will be used in this game
      */
     public Game(int boardSize){
+        this.turnNumber = 0;
         this.boardSize = boardSize;
         players = new ArrayList<>();
         int[] bounds = findBounds(boardSize);
@@ -80,6 +85,14 @@ public class Game {
     }
 
     /**
+     * Returns the turn number for this game
+     * @return The turn number for this game
+     */
+    public int getTurn(){
+        return this.turnNumber;
+    }
+
+    /**
      * Place pieces of a specific ShipType and Direction in a specific place
      * on a specific player's board.
      * @param type The type of the Ship
@@ -105,11 +118,17 @@ public class Game {
         }
     }
 
+    /**
+     * Updates the given player's grid with the symbol representing a hit or 
+     * miss.
+     * @param row The row to attempt an attack on 
+     * @param col The column to attempt an attack on
+     * @return True if the grid contains only sunken ships after the attack,
+     * otherwise returns false
+     */
     public boolean attack(int index, int row, int col){
-        if(players.get(index).attack(row, col)){
-            return true;
-        }
-        return false;
+        this.turnNumber++;
+        return (players.get(index).attack(row, col));
     }
 
     /**
