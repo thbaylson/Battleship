@@ -197,6 +197,7 @@ public class BattleServer implements MessageListener {
                     broadcast(playerNames.get(getPlayerBySource(source)) +
                          " has started the game!");
                     broadcast(playerNames.get(0) + " it is your turn!");
+                    broadcast("pTurn: " + this.game.getTurn());
                     this.playing = true;
                 } else {//Not enough players
                     sendMessage("There are not enough players to start the "+
@@ -347,7 +348,7 @@ public class BattleServer implements MessageListener {
                     
                     //Check if it's the player's turn
                     if(validDimensions){
-                        if(requester == (this.game.getTurn() % players.size())){
+                        if(requester == (this.game.getTurn() % playerNames.size())){
                             //Prevent players from attacking themselves
                             if(request != requester){
                                 boolean playerDefeated = 
@@ -387,15 +388,16 @@ public class BattleServer implements MessageListener {
                                 }
                                 //Changes who's turn it is
                                 if(!checkWinConditions()){
+                                    broadcast("aTurn: " + this.game.getTurn());
                                     broadcast(playerNames.get((requester + 1) 
-                                        % players.size()) 
+                                        % playerNames.size()) 
                                     + " it is your turn!");
                                 }
                             }
                         }else{
                             //Trying to attack when its someone elses turn
                             sendMessage("It is currently " + playerNames.get(
-                                this.game.getTurn() % players.size()) + 
+                                this.game.getTurn() % playerNames.size()) + 
                                     "'s turn.", source);
                         }
                     } else{
