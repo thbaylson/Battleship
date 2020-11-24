@@ -69,28 +69,31 @@ public class BattleClient extends MessageSource implements MessageListener{
             //Making a connection agent 
             this.connection = new ConnectionAgent(socket);
             connection.addMessageListener(this);
+            //Creating new thread of a connection agent
             Thread t = new Thread(this.connection);
             t.start();
             
             //SEND A join message
             send("/join " + this.username);
-                while(connection.isConnected()){
-                    command = s.nextLine();
-                    //Making sure command isn't /join while username is used.
-                    //And also forcing other players to quit that isn't themselves
-                    if(!checkCmd(command)){
-                        //SEND COMMAND TO SERVER 
-                        send(command);
-                    } 
-                    if(quitting(command)){
-                        t.interrupt();
-                        connection.close();
-                        sourceClosed(this);
-                    }
-                    //Players can send commands to show boards and such while it isnt their 
-                    //turn but the server will check otehr commands such as attack to make sure its their turn
+            while(connection.isConnected()){
+                command = s.nextLine();
+                //Making sure command isn't /join while username is used.
+                //And also forcing other players to quit that isn't themselves
+                if(!checkCmd(command)){
+                    //SEND COMMAND TO SERVER 
+                    send(command);
+                } 
+                //If user wishes to quit the program it alerts the server to 
+                //remove them then closes all connections.
+                if(quitting(command)){
+                    t.interrupt();
+                    connection.close();
+                    sourceClosed(this);
                 }
-            //Send msg to other clients user quit
+                //Players can send commands to show boards and such while it 
+                //isnt their turn but the server will check otehr commands 
+                //such as attack to make sure its their turn
+            }
             //Close socket with sourceClosed()
             t.interrupt();
             connection.removeMessageListener(this);
@@ -98,23 +101,25 @@ public class BattleClient extends MessageSource implements MessageListener{
             this.closeMessageSource();
         } catch(IOException e){
             s.close();
-            //connection.close();
             System.out.println("Error: An IOException has occurred." +
                 " Make sure the command line arguments you inputted " +
                 " are valid and retry.");
             System.exit(1);
         } catch(NoSuchElementException e){ //DOING CTRL-C ON INPUT
             s.close();
-            //connection.close();
             System.exit(1);
-        } catch(NumberFormatException e){
+        } catch(NumberFormatException e){//Input isn't integers
             s.close();
             System.out.println("Number format exception");
-            //connection.close();
             System.exit(1);
         }
     }
 
+    /**
+     * The purpose of this function is to see if the command to quit is valid
+     * @param String: Command the user wants to quit
+     * @return boolean: If quit command is /quit <name>
+     */
     public boolean quitting(String command){
         String[] cmd = command.split(" ");
         if(cmd[0].toLowerCase().equals("/quit")){
@@ -125,23 +130,30 @@ public class BattleClient extends MessageSource implements MessageListener{
         return false;
     }
 
+    /**
+     * The purpose of this function is to check and make sure a user can't join
+     * a game that is already in use, handles it if they need to rejoin, and
+     * also handles trying to quit other players
+     * @param String: Command given form user
+     * @return boolean: If command given is valid to send to server
+     */
     public boolean checkCmd(String command){
         String[] cmd = command.split(" ");
         if(cmd[0].toLowerCase().equals("/join")){
-            if(this.username != null){
+            if(this.username != null){//If user is still active
                 System.out.println("Error: Cannot join a new player with used client.");
                 return true;
             } else {
                 if(cmd.length > 1){
-                    this.username = cmd[1];
-                    try {
+                    this.username = cmd[1];//Setting new username
+                    try {//Creating new connectionAgents
                         this.connection = new ConnectionAgent(socket);
                         connection.addMessageListener(this);
                     } catch (IOException e) {
-                        System.out.println("Error: An Error occurred while trying to rejoin." +
-                            " Please retry.");
+                        System.out.println("Error: An Error occurred while " +
+                            " trying to rejoin.  Please retry.");
                     }
-                    
+                    //Starting thread to talk to server with
                     Thread t = new Thread(this.connection);
                     t.start();
                     return false;
@@ -149,7 +161,7 @@ public class BattleClient extends MessageSource implements MessageListener{
             }
         } else if(cmd[0].toLowerCase().equals("/quit")){
             if(cmd.length != 1){
-                if(!cmd[1].equals(this.username)){
+                if(!cmd[1].equals(this.username)){//Cant quit other players
                     System.out.println("Error: Cannot quit another player" +
                         " that is not yourself.");
                         return true;
@@ -161,6 +173,12 @@ public class BattleClient extends MessageSource implements MessageListener{
         return false;
     }
 
+    /**
+     * The purpose of this function it to make sure the commands entered have 
+     * the correct length if they're valid commands.
+     * @param String[]: Array of the commands given
+     * @return boolean: If length is valid or if its an invalid command
+     */
     public boolean validLength(String[] cmd){
         if(cmd.length > 0){
             if(cmd[0].toLowerCase().equals("/attack")){
@@ -204,16 +222,20 @@ public class BattleClient extends MessageSource implements MessageListener{
      * @param source  The source from which this message originated (if needed).
      */
     public void messageReceived(String msg, MessageSource source){
-        if(msg.equals("1")){
+        if(msg.equals("1")){//Letting client know they can quit safely
             this.username = null;
-        } else {
+        } else {//Prints out message received
             printStream.messageReceived(msg, source);
+            //If a player loses, it closes the connection
             if(msg.equals(this.username + " has been defeated!")){
                 sourceClosed(this);
             } 
         }
     }
 
+    /**
+     * The purpose of this function is to 
+     */
     public void send(String msg){
         connection.sendMessage(msg);
     }   
