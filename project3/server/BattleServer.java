@@ -161,7 +161,6 @@ public class BattleServer implements MessageListener {
                 if(name.equals(cmds[1])){
                     int player = playerNames.indexOf(cmds[1]);
                     broadcast(playerNames.get(player) + " has surrendered!");
-                    this.playing = activePlayers != 1;
                     removePlayer(player);
                 }
             } 
