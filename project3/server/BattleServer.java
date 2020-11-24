@@ -59,6 +59,26 @@ public class BattleServer implements MessageListener {
         thread.start();
         threads.add(thread);
         players.add(ca);    
+        
+        /*
+        int i = 0;
+        
+        for(ConnectionAgent t : players){
+            if(!t.isConnected()){
+                System.out.println(message + " inside");
+                String[] cmds = message.split(" ");
+                MessageSource ml = players.get(i);
+                quitCmd(cmds, ml);
+            }
+            i++;
+            //Check if theres a connection (client does ctrl-c)
+        }*/
+        
+        if(this.server.isClosed()){
+            for(Thread t : threads){
+                t.interrupt();
+            }
+        }
     }
 
     /**
@@ -102,7 +122,6 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
-        System.out.println(message);
         handleMessage(message, source);
     }
 
@@ -316,6 +335,9 @@ public class BattleServer implements MessageListener {
             players.get(player).close();
             players.remove(player);
             playerNames.remove(player);
+            Thread t = this.threads.get(player);
+            t.interrupt();
+            this.threads.remove(player);
             this.game.removePlayerAt(player);
             this.activePlayers--;
             //TODO: invoke sourceClosed()?

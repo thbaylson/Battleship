@@ -80,6 +80,7 @@ public class BattleClient extends MessageSource implements MessageListener{
                         connection.close();
                         sourceClosed(this);
                     }
+                    
                     //Players can send commands to show boards and such while it isnt their 
                     //turn but the server will check otehr commands such as attack to make sure its their turn
                 }
