@@ -201,6 +201,7 @@ public class BattleServer implements MessageListener {
                     broadcast(playerNames.get(getPlayerBySource(source)) +
                          " has started the game!");
                     broadcast(playerNames.get(0) + " it is your turn!");
+                    broadcast("pTurn: " + this.game.getTurn());
                     this.playing = true;
                 } else {//Not enough players
                     sendMessage("There are not enough players to start the "+
@@ -422,7 +423,7 @@ public class BattleServer implements MessageListener {
                             } else {
                                 turn = amt + 1;
                             }
-                            sendMessage("It is currently " + playerNames.get(turn)) + 
+                            sendMessage("It is currently " + playerNames.get(turn) + 
                                     "'s turn.", source);
                         }
                     } else{

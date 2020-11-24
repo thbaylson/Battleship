@@ -38,7 +38,7 @@ public class BattleDriver {
             System.exit(1);
         }
         try{ 
-            if(args.length == 2){
+            if(args.length == 2){// Incorrent assumption that the port was left off
                 hostname = args[0];
                 userName = args[1];
             } else {//only port given
