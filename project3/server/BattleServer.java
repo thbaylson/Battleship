@@ -226,6 +226,7 @@ public class BattleServer implements MessageListener {
                     int player = playerNames.indexOf(cmds[1]);
                     broadcast(playerNames.get(player) + " has surrendered!");
                     removePlayer(player);//removing player information
+                    checkWinConditions();
                 }
             } 
             if(first){//If this isn't here it prints the usage message twice
