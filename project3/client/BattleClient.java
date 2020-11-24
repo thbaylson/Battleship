@@ -73,7 +73,6 @@ public class BattleClient extends MessageSource implements MessageListener{
             
             //SEND A join message
             send("/join " + this.username);
-            while(!command.toLowerCase().equals("/quit")){
                 while(connection.isConnected()){
                     command = s.nextLine();
                     //Making sure command isn't /join while username is used.
@@ -81,36 +80,21 @@ public class BattleClient extends MessageSource implements MessageListener{
                     if(!checkCmd(command)){
                         //SEND COMMAND TO SERVER 
                         send(command);
+                    } 
+                    if(quitting(command)){
+                        t.interrupt();
+                        connection.close();
+                        sourceClosed(this);
                     }
                     //Players can send commands to show boards and such while it isnt their 
                     //turn but the server will check otehr commands such as attack to make sure its their turn
                 }
-                command = s.nextLine();
-                String[] cmd = command.split(" ");
-                System.out.println("Here: " + command);
-                
-                if(cmd[0].equals("/join")){
-                    this.username = cmd[1];
-                    System.out.println("Check inside");
-                    t.interrupt();
-                    connection.close();
-                    socket.close();
-
-                    this.socket = new Socket(this.host, this.port);
-                    this.connection = new ConnectionAgent(socket);
-                    connection.addMessageListener(this);
-                    t = new Thread(this.connection);
-                    t.start();
-
-                    send("/join " + this.username);
-                }
-            }
             //Send msg to other clients user quit
             //Close socket with sourceClosed()
             t.interrupt();
+            connection.removeMessageListener(this);
             connection.close();
             this.closeMessageSource();
-
         } catch(IOException e){
             s.close();
             //connection.close();
@@ -128,6 +112,16 @@ public class BattleClient extends MessageSource implements MessageListener{
             //connection.close();
             System.exit(1);
         }
+    }
+
+    public boolean quitting(String command){
+        String[] cmd = command.split(" ");
+        if(cmd[0].toLowerCase().equals("/quit")){
+            if(cmd.length > 1){
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean checkCmd(String command){
@@ -160,8 +154,6 @@ public class BattleClient extends MessageSource implements MessageListener{
                         return true;
                 } else {
                     this.username = null;
-                    connection.removeMessageListener(this);
-                    this.connection = null;
                 }
             }
         }
@@ -234,5 +226,9 @@ public class BattleClient extends MessageSource implements MessageListener{
         
         //Do all cleanup
         //this.s.close();
+        connection.removeMessageListener(this);
+        source.removeMessageListener(this);
+        this.closeMessageSource();
+        System.exit(0);
     }
 }

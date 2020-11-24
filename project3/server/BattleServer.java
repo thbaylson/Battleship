@@ -53,21 +53,13 @@ public class BattleServer implements MessageListener {
      * @throws IOException
      */
     public void listen() throws IOException {
-        Socket socket = this.server.accept();   
-        
+        Socket socket = this.server.accept();
         ConnectionAgent ca = new ConnectionAgent(socket);
         ca.addMessageListener(this);
-        System.out.println("--------------------------Start-----------------------");
         Thread thread = new Thread(ca);
         thread.start();
         threads.add(thread);
-        players.add(ca);
-
-        if(this.server.isClosed()){
-            for(Thread th : threads){
-                th.interrupt();
-            }
-        }
+        players.add(ca);    
     }
 
     /**
@@ -77,6 +69,14 @@ public class BattleServer implements MessageListener {
     private void broadcast(String message){
         for(ConnectionAgent player : players){
             player.sendMessage(message);
+        }
+    }
+
+    public void close(){
+        if(this.server.isClosed()){
+            for(Thread th : threads){
+                th.interrupt();
+            }
         }
     }
 
@@ -96,6 +96,7 @@ public class BattleServer implements MessageListener {
     private void sendMessage(String message, MessageSource source){
         for(ConnectionAgent player : players){
             if(player.equals(source)){
+                System.out.println(message + " check sendMessage");
                 player.sendMessage(message);
             }
         }
@@ -107,7 +108,7 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
-        //System.out.println(message + " Message Gotten");
+        System.out.println(message + " Message Got");
         handleMessage(message, source);
     }
 
@@ -142,12 +143,14 @@ public class BattleServer implements MessageListener {
 
     private void playCmd(String[] cmds, MessageSource source){
         if(!playing){
-            if(activePlayers >= 2){
-                broadcast(playerNames.get(getPlayerBySource(source)) + " has started the game!");
-                broadcast(playerNames.get(0) + " it is your turn!");
-                this.playing = true;
-            } else {
-                sendMessage("There are not enough players to start the game.", source);
+            if(cmds[0].toLowerCase().equals("/play")){
+                if(activePlayers >= 2){
+                    broadcast(playerNames.get(getPlayerBySource(source)) + " has started the game!");
+                    broadcast(playerNames.get(0) + " it is your turn!");
+                    this.playing = true;
+                } else {
+                    sendMessage("There are not enough players to start the game.", source);
+                }
             }
         } else {
             sendMessage("The game has already started.", source);
@@ -190,10 +193,11 @@ public class BattleServer implements MessageListener {
                 }
             }
             if(validName){
+                int index = players.indexOf(source);
                 this.activePlayers++;
                 this.game.addPlayer();
                 this.playerNames.add(cmds[1]);
-                System.out.println(cmds[1] + " Name joining");
+
                 sendMessage("Welcome " + cmds[1] + "!", source);
                 broadcastExcept(cmds[1] + " has connected!", source);
             }
@@ -305,17 +309,17 @@ public class BattleServer implements MessageListener {
      * @param player The index of a player to be removed
      */
     private void removePlayer(int player){
-        //try {
-            //players.get(player).close();
-            //players.remove(player);
+        try {
+            players.get(player).close();
+            players.remove(player);
             playerNames.remove(player);
             this.game.removePlayerAt(player);
             this.activePlayers--;
             //TODO: invoke sourceClosed()?
-        //} catch (IOException e) {
+        } catch (IOException e) {
             //Exceptions on this level should be printed to the server
-           // System.out.println("Error removing player");
-        //}
+            System.out.println("Error removing player");
+        }
     }
 
     private void checkWinConditions(){

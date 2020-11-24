@@ -7,6 +7,7 @@
 package server;
 
 import java.io.IOException;
+import java.util.NoSuchElementException;
 
 /**
  * BattleShipDriver contains the main() method for the server. It parses command
@@ -27,7 +28,9 @@ public class BattleShipDriver {
                 int boardSize = Integer.parseInt(args[1]);
 
                 BattleServer server = new BattleServer(portNumber, boardSize);
+                System.out.println("here");
                 while(!server.isClosed()){
+                    System.out.println("here1");
                     server.listen();
                 }
             }catch(NumberFormatException nfe){
@@ -49,6 +52,7 @@ public class BattleShipDriver {
                 while(!server.isClosed()){
                     server.listen();
                 }
+                server.close();
             }catch(NumberFormatException nfe){
                 System.out.println("Invalid Port or Boardsize. Please Retry.");
                 System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
@@ -58,7 +62,7 @@ public class BattleShipDriver {
                    " please retry.");
                 System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");
                 System.exit(1);
-            }
+            } 
         } else {
             System.out.println("Error: Not enough command line arguments given.");
             System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");

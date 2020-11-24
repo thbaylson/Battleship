@@ -33,10 +33,7 @@ public class ConnectionAgent extends MessageSource implements Runnable{
     }
 
     public void sendMessage(String msg){
-        // Maybe use this.in or this.out here
-        //System.out.println("HERE: " + msg);
         this.out.println(msg);
-        //this.notifyReceipt(msg);
     }
 
     public boolean isConnected(){
