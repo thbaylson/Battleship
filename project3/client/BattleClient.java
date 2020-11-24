@@ -24,6 +24,7 @@ import java.util.*;
  * class also extends MessageSource, indicating that it also plays the
  * role of "subject" in an instance of the observer pattern.
  * @implements MessageListener: Interface some functions are used from
+ * @extends MessageSource: ConnectionAgent is an instance of MessageSource
  */
 public class BattleClient extends MessageSource implements MessageListener{
 
@@ -53,10 +54,16 @@ public class BattleClient extends MessageSource implements MessageListener{
         this.addMessageListener(printStream);
     }
 
+    /**
+     * The purpose of this function is to create a new ConnectionAgent
+     * whenever a new client joins by creating a nw thread and waiting for user
+     * input.
+     */
     public void connect() {
         this.s = new Scanner(System.in);
         String command = "";
-        try{              
+        try{            
+            //Creating new socket  
             this.socket = new Socket(this.host, this.port);
             
             //Making a connection agent 
