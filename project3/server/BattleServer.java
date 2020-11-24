@@ -27,6 +27,7 @@ public class BattleServer implements MessageListener {
     private int activePlayers;
     private boolean playing;
     private int boardSize;
+    private int amt;
     private ArrayList<ConnectionAgent> players;//Used to store any CA found
     private ArrayList<String> playerNames;//Used to store player names when
                                         //They join
@@ -67,6 +68,9 @@ public class BattleServer implements MessageListener {
 
         /**Number of current players*/
         this.activePlayers = 0;
+        this.amt = 0;
+
+
     }
 
     /**
@@ -347,7 +351,13 @@ public class BattleServer implements MessageListener {
                     
                     //Check if it's the player's turn
                     if(validDimensions){
-                        if(requester == (this.game.getTurn() % players.size())){
+                        int val = this.game.getTurn() % players.size();
+                        System.out.println("Amt: " + amt);
+                        System.out.println("Requester: "+ requester);
+                        System.out.println("Size: " + (playerNames.size() - 1));
+                        System.out.println(this.game.getTurn());
+                        
+                        if(requester == amt){
                             //Prevent players from attacking themselves
                             if(request != requester){
                                 boolean playerDefeated = 
@@ -384,18 +394,35 @@ public class BattleServer implements MessageListener {
                                     broadcast(playerNames.get(request) + 
                                         " has been defeated!");
                                     removePlayer(request);
-                                }
+                                } 
                                 //Changes who's turn it is
                                 if(!checkWinConditions()){
-                                    broadcast(playerNames.get((requester + 1) 
-                                        % players.size()) 
+                                    int turn = 0;
+                                    if((amt + 1) > (playerNames.size()- 1)){
+                                        turn = 0;
+                                    } else {
+                                        turn = amt + 1;
+                                    }
+                                    broadcast(playerNames.get(turn) 
                                     + " it is your turn!");
                                 }
                             }
+                            if((amt + 1) > (playerNames.size()- 1)){
+                                amt = 0;
+                            } else {
+                                amt++;
+                            }
+                            System.out.println("New Amt: "+ amt);
+                            System.out.println("----------------");
                         }else{
                             //Trying to attack when its someone elses turn
-                            sendMessage("It is currently " + playerNames.get(
-                                this.game.getTurn() % players.size()) + 
+                            int turn = 0;
+                            if((amt + 1) > (playerNames.size()- 1)){
+                                turn = 0;
+                            } else {
+                                turn = amt + 1;
+                            }
+                            sendMessage("It is currently " + playerNames.get(turn)) + 
                                     "'s turn.", source);
                         }
                     } else{
