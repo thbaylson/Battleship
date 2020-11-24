@@ -197,9 +197,13 @@ public class BattleClient extends MessageSource implements MessageListener{
      * @param source  The source from which this message originated (if needed).
      */
     public void messageReceived(String msg, MessageSource source){
-        printStream.messageReceived(msg, source);
-        if(msg.equals(this.username + " has been defeated!")){
-            sourceClosed(this);
+        if(msg.equals("1")){
+            this.username = null;
+        } else {
+            printStream.messageReceived(msg, source);
+            if(msg.equals(this.username + " has been defeated!")){
+                sourceClosed(this);
+            } 
         }
     }
 

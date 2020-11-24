@@ -182,6 +182,7 @@ public class BattleServer implements MessageListener {
                 if(name.equals(cmds[1])){
                     validName = false;
                     sendMessage("The name " + cmds[1] + " is already in use. Please enter a new name.", source);
+                    sendMessage("1", source);
                 }
             }
             if(validName){
