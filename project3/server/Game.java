@@ -131,6 +131,14 @@ public class Game {
         return (players.get(index).attack(row, col));
     }
 
+    public String getSunk(int i){
+        return players.get(i).getSunk();
+    }
+
+    public void setSunk(int i, String s){
+        players.get(i).setSunk("");
+    }
+
     /**
      * Removes all pieces and states from the given player's Grid
      * @param index The player whose Grid will be cleared

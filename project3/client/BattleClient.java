@@ -33,13 +33,8 @@ public class BattleClient extends MessageSource implements MessageListener{
     private Socket socket;
     private PrintStreamMessageListener printStream;
     private String username;
-
-    private ArrayList<Thread> threads;
     private ConnectionAgent connection;
-    private final String invalidCmd1 = "Valid Command are: "+
-                                "\n\t /join <name>\n\t /play \n\t "+ 
-                                "/attack <target> <[row]> <[col]>" +
-                                "\n\t /quit\n\t /show <target>\n";
+
     /** 
      * This constructor is to initialize global variables passed from client
      * driver.
@@ -54,7 +49,6 @@ public class BattleClient extends MessageSource implements MessageListener{
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
-        this.threads = new ArrayList<>();
         this.printStream = new PrintStreamMessageListener(System.out);
         this.addMessageListener(printStream);
     }
@@ -73,7 +67,6 @@ public class BattleClient extends MessageSource implements MessageListener{
             
             //SEND A join message
             send("/join " + this.username);
-            while(!command.toLowerCase().equals("/quit")){
                 while(connection.isConnected()){
                     command = s.nextLine();
                     //Making sure command isn't /join while username is used.
@@ -81,36 +74,21 @@ public class BattleClient extends MessageSource implements MessageListener{
                     if(!checkCmd(command)){
                         //SEND COMMAND TO SERVER 
                         send(command);
+                    } 
+                    if(quitting(command)){
+                        t.interrupt();
+                        connection.close();
+                        sourceClosed(this);
                     }
                     //Players can send commands to show boards and such while it isnt their 
                     //turn but the server will check otehr commands such as attack to make sure its their turn
                 }
-                command = s.nextLine();
-                String[] cmd = command.split(" ");
-                System.out.println("Here: " + command);
-                
-                if(cmd[0].equals("/join")){
-                    this.username = cmd[1];
-                    System.out.println("Check inside");
-                    t.interrupt();
-                    connection.close();
-                    socket.close();
-
-                    this.socket = new Socket(this.host, this.port);
-                    this.connection = new ConnectionAgent(socket);
-                    connection.addMessageListener(this);
-                    t = new Thread(this.connection);
-                    t.start();
-
-                    send("/join " + this.username);
-                }
-            }
             //Send msg to other clients user quit
             //Close socket with sourceClosed()
             t.interrupt();
+            connection.removeMessageListener(this);
             connection.close();
             this.closeMessageSource();
-
         } catch(IOException e){
             s.close();
             //connection.close();
@@ -128,6 +106,16 @@ public class BattleClient extends MessageSource implements MessageListener{
             //connection.close();
             System.exit(1);
         }
+    }
+
+    public boolean quitting(String command){
+        String[] cmd = command.split(" ");
+        if(cmd[0].toLowerCase().equals("/quit")){
+            if(cmd.length > 1){
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean checkCmd(String command){
@@ -160,8 +148,6 @@ public class BattleClient extends MessageSource implements MessageListener{
                         return true;
                 } else {
                     this.username = null;
-                    connection.removeMessageListener(this);
-                    this.connection = null;
                 }
             }
         }
@@ -211,8 +197,10 @@ public class BattleClient extends MessageSource implements MessageListener{
      * @param source  The source from which this message originated (if needed).
      */
     public void messageReceived(String msg, MessageSource source){
-        //System.out.println(msg + " msg received");
         printStream.messageReceived(msg, source);
+        if(msg.equals(this.username + " has been defeated!")){
+            sourceClosed(this);
+        }
     }
 
     public void send(String msg){
@@ -234,5 +222,9 @@ public class BattleClient extends MessageSource implements MessageListener{
         
         //Do all cleanup
         //this.s.close();
+        connection.removeMessageListener(this);
+        source.removeMessageListener(this);
+        this.closeMessageSource();
+        System.exit(0);
     }
 }
