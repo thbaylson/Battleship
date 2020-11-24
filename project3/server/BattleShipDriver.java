@@ -28,9 +28,7 @@ public class BattleShipDriver {
                 int boardSize = Integer.parseInt(args[1]);
 
                 BattleServer server = new BattleServer(portNumber, boardSize);
-                System.out.println("here");
                 while(!server.isClosed()){
-                    System.out.println("here1");
                     server.listen();
                 }
             }catch(NumberFormatException nfe){

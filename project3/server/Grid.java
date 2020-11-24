@@ -25,6 +25,8 @@ public class Grid {
     /**The ships that have been placed on the game board */
     private ArrayList<Ship> ships;
 
+    private String sunk;
+
     /**
      * Default constructor to initialize a grid when no parameters are passed
      */
@@ -40,6 +42,7 @@ public class Grid {
         //Creating a new board of squares with symbol S to test formatting
         this.ships = new ArrayList<>();
         this.boardSize = boardSize;
+        this.sunk = "";
         this.board = new Square[boardSize][boardSize];
         for(int i = 0; i < boardSize; i++){
             for(int j = 0; j < boardSize; j++){
@@ -129,7 +132,6 @@ public class Grid {
             
             int[] head = {rand.nextInt(boardSize), rand.nextInt(boardSize)};
             Ship ship = new Ship(type, dir, head);
-            //System.out.println("Attempting a: " + type.getSymbol() + " facing " + dir.getName() + " at col " + head[0] + ", row " + head[1]);
             pieceSet = setPiece(ship);
         }
     }
@@ -175,13 +177,21 @@ public class Grid {
                     s.hit(index);
                     this.board[row][col].setToDraw(s.getParts()[index]);
                     if(s.isSunken()){
-                        System.out.println(s.getType().getType() + " Was Sunk!");
+                        this.sunk = s.getType().getType();
                         return checkEndCondition();
                     }
                 }
             }
         }
         return false;
+    }
+
+    public String getSunk(){
+        return this.sunk;
+    }
+
+    public void setSunk(String s){
+        this.sunk = "";
     }
 
     /**
@@ -203,7 +213,6 @@ public class Grid {
             }
         }
         if(sunkenShips == ships.size()){
-            //System.out.println("Player Loses!");
             return true;
         }
         return false;

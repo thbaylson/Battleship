@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
 
 import common.*;
 
@@ -67,6 +66,7 @@ public class BattleServer implements MessageListener {
      * @param message
      */
     private void broadcast(String message){
+        message = message + "\n";
         for(ConnectionAgent player : players){
             player.sendMessage(message);
         }
@@ -86,8 +86,9 @@ public class BattleServer implements MessageListener {
      * @param player
      */
     private void broadcastExcept(String message, MessageSource source){
+        message = message + "\n";
         for(ConnectionAgent player : players){
-            if(!player.equals(source)){
+            if(!player.equals(source)){          
                 player.sendMessage(message);
             }
         }
@@ -96,7 +97,7 @@ public class BattleServer implements MessageListener {
     private void sendMessage(String message, MessageSource source){
         for(ConnectionAgent player : players){
             if(player.equals(source)){
-                System.out.println(message + " check sendMessage");
+                message = message + "\n";
                 player.sendMessage(message);
             }
         }
@@ -108,7 +109,6 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
-        System.out.println(message + " Message Got");
         handleMessage(message, source);
     }
 
@@ -158,7 +158,6 @@ public class BattleServer implements MessageListener {
     }
 
     private void quitCmd(String[] cmds, MessageSource source){
-        //TODO: CLOSE THE SOURCE
         int size = this.boardSize - 1;
         //We have to do for loop bc we get a ConcurrentModificationException
         //Here when using a for-each loop (not sure exactly why though)
@@ -193,7 +192,6 @@ public class BattleServer implements MessageListener {
                 }
             }
             if(validName){
-                int index = players.indexOf(source);
                 this.activePlayers++;
                 this.game.addPlayer();
                 this.playerNames.add(cmds[1]);
@@ -263,28 +261,36 @@ public class BattleServer implements MessageListener {
                     //Check if it's the player's turn
                     if(validDimensions){
                         if(requester == (this.game.getTurn() % players.size())){
-
                             //Prevent players from attacking themselves
                             if(request != requester){
                                 boolean playerDefeated = this.game.attack(request, row, col);
                                 sendMessage("Attack Report:\n" + 
                                     this.game.getInactiveBoard(request), source);
 
+                                
                                 broadcastExcept(playerNames.get(requester) +
-                                    " has attacked!", players.get(request));
+                                    " has attacked " + playerNames.get(request) + "!"
+                                        , players.get(request));
+                                
+                                String sunk = this.game.getSunk(request);
+                                if(!sunk.equals("")){
+                                    broadcast(playerNames.get(requester) +
+                                        " has sunk " + playerNames.get(request) + "'s " 
+                                        + sunk + "!");
+                                        this.game.setSunk(request, "");
+                                }
 
                                 sendMessage(playerNames.get(requester) + 
                                     " has attacked you!\nAttack Report:\n" +
                                     this.game.getActiveBoard(request), players.get(request));
-
-                                broadcast(playerNames.get((requester + 1) % players.size()) 
-                                    + " it is your turn!");
-                                
                                 if(playerDefeated){
                                     broadcast(playerNames.get(request) + " has been defeated!");
                                     removePlayer(request);
                                 }
-                                checkWinConditions();
+                                if(!checkWinConditions()){
+                                    broadcast(playerNames.get((requester + 1) % players.size()) 
+                                    + " it is your turn!");
+                                }
                             }
                         }else{
                             sendMessage("It is currently " + playerNames.get(
@@ -322,7 +328,7 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    private void checkWinConditions(){
+    private boolean checkWinConditions(){
         if(playerNames.size() == 1 && playing){
             this.playing = false;
             String player = playerNames.get(0);
@@ -330,7 +336,9 @@ public class BattleServer implements MessageListener {
             
             this.game = new Game(boardSize);
             this.game.addPlayer();
+            return true;
         }
+        return false;
     }
 
     /**

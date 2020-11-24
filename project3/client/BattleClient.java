@@ -33,13 +33,8 @@ public class BattleClient extends MessageSource implements MessageListener{
     private Socket socket;
     private PrintStreamMessageListener printStream;
     private String username;
-
-    private ArrayList<Thread> threads;
     private ConnectionAgent connection;
-    private final String invalidCmd1 = "Valid Command are: "+
-                                "\n\t /join <name>\n\t /play \n\t "+ 
-                                "/attack <target> <[row]> <[col]>" +
-                                "\n\t /quit\n\t /show <target>\n";
+
     /** 
      * This constructor is to initialize global variables passed from client
      * driver.
@@ -54,7 +49,6 @@ public class BattleClient extends MessageSource implements MessageListener{
         this.host = InetAddress.getByName(hostname);
         this.port = port;
         this.username = username;
-        this.threads = new ArrayList<>();
         this.printStream = new PrintStreamMessageListener(System.out);
         this.addMessageListener(printStream);
     }
@@ -203,8 +197,10 @@ public class BattleClient extends MessageSource implements MessageListener{
      * @param source  The source from which this message originated (if needed).
      */
     public void messageReceived(String msg, MessageSource source){
-        //System.out.println(msg + " msg received");
         printStream.messageReceived(msg, source);
+        if(msg.equals(this.username + " has been defeated!")){
+            sourceClosed(this);
+        }
     }
 
     public void send(String msg){
