@@ -102,6 +102,7 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void messageReceived(String message, MessageSource source) {
+        System.out.println(message);
         handleMessage(message, source);
     }
 
@@ -161,7 +162,6 @@ public class BattleServer implements MessageListener {
                 if(name.equals(cmds[1])){
                     int player = playerNames.indexOf(cmds[1]);
                     broadcast(playerNames.get(player) + " has surrendered!");
-                    this.playing = activePlayers != 1;
                     removePlayer(player);
                 }
             } 
@@ -172,6 +172,9 @@ public class BattleServer implements MessageListener {
                     first = false;
                 }
             }
+        }
+        if(activePlayers == 1){
+            this.playing = false;
         }
     }
 
