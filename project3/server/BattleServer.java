@@ -72,13 +72,6 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    public void close(){
-        if(this.server.isClosed()){
-            for(Thread th : threads){
-                th.interrupt();
-            }
-        }
-    }
 
     /**
      * Broadcasts a message to every connection except the given connection
