@@ -21,19 +21,35 @@ public class PrintStreamMessageListener implements MessageListener {
 
     private PrintStream out;
 
+    /**
+     * The purpose of this constructor is to initialize the 
+     * PrintStream variable.
+     * @param out: PrintStream we wish to print to
+     */
     public PrintStreamMessageListener(PrintStream out) {
         this.out = out;
     }
 
+    /**
+     * Used to notify observers that the subject has received a message.
+     *
+     * @param message The message received by the subject
+     * @param source  The source from which this message originated (if needed).
+     */
     @Override
     public void messageReceived(String message, MessageSource source) {
         this.out.println(message);
     }
 
+    /**
+     * Used to notify observers that the subject will not receive new messages; 
+     * observers can deregister themselves.
+     *
+     * @param source The MessageSource that does not expect more messages.
+     */
     @Override
     public void sourceClosed(MessageSource source) {
-        // TODO Auto-generated method stub
-
+        this.out.close();
     }
     
 }

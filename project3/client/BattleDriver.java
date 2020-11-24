@@ -41,7 +41,7 @@ public class BattleDriver {
             if(args.length == 2){
                 hostname = args[0];
                 userName = args[1];
-            } else {
+            } else {//only port given
                 hostname = args[0];
                 port = Integer.parseInt(args[1]);
                 userName = args[2];
@@ -50,11 +50,13 @@ public class BattleDriver {
             client.connect();
         } catch(NumberFormatException e){
             System.out.println("Invalid Port Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname port "+
+                "nickname");
             System.exit(1);
         } catch(UnknownHostException e){
             System.out.println("Unknown Host Given. Please Retry.");
-            System.out.println("Usage: java client.BattleDriver hostname port nickname");
+            System.out.println("Usage: java client.BattleDriver hostname port "+
+                "nickname");
             System.exit(1);
         }
     }

@@ -141,7 +141,8 @@ public class BattleClient extends MessageSource implements MessageListener{
         String[] cmd = command.split(" ");
         if(cmd[0].toLowerCase().equals("/join")){
             if(this.username != null){//If user is still active
-                System.out.println("Error: Cannot join a new player with used client.");
+                System.out.println("Error: Cannot join a new player with "+
+                    "used client.");
                 return true;
             } else {
                 if(cmd.length > 1){
@@ -205,11 +206,12 @@ public class BattleClient extends MessageSource implements MessageListener{
                         return true;
                     }
                 } else {
-                    System.out.println("Error: Cannot join a game in which a player"+
-                        " is already playing.");
+                    System.out.println("Error: Cannot join a game in which a "+
+                    "player is already playing.");
                 }
             }
-            //Returns true if its an invalid command and server sends back useage message
+            //Returns true if its an invalid command and server sends back 
+            //useage message
             return true;
         }
         return true;
@@ -234,27 +236,30 @@ public class BattleClient extends MessageSource implements MessageListener{
     }
 
     /**
-     * The purpose of this function is to 
+     * The purpose of this function is to send messages to the connection 
+     * agent so it can be delivered to the server
+     * @param String: msg to be sent
      */
     public void send(String msg){
         connection.sendMessage(msg);
     }   
 
     /**
-     * Used to notify observers that the subject will not receive new messages; observers can
-     * deregister themselves.
+     * Used to notify observers that the subject will not receive new messages; 
+     * observers can deregister themselves.
      *
      * @param source The MessageSource that does not expect more messages.
      */
     @Override
     public void sourceClosed(MessageSource source) {
-        //ConnectionAgent is closing itself bc it doesn't know what its connected to
+        //ConnectionAgent is closing itself bc it doesn't know what its 
+        //connected to
         // and doesn't care
-        //The server will invoke my sourceClosed whenever I want to quit and let everyone else 
+        //The server will invoke my sourceClosed whenever I want to quit
+        // and let everyone else 
         //know via broadcast msg I have surrendered
         
-        //Do all cleanup
-        //this.s.close();
+        //Do all cleanup and exit gracefully
         connection.removeMessageListener(this);
         source.removeMessageListener(this);
         this.closeMessageSource();
