@@ -50,7 +50,6 @@ public class BattleShipDriver {
                 while(!server.isClosed()){
                     server.listen();
                 }
-                server.close();
             }catch(NumberFormatException nfe){
                 System.out.println("Invalid Port or Boardsize. Please Retry.");
                 System.out.println("Usage: java server.BattleShipDriver <port> <boardsize>");

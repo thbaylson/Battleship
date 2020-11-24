@@ -351,6 +351,6 @@ public class BattleServer implements MessageListener {
 
     @Override
     public void sourceClosed(MessageSource source) {
-        //TODO SourceClosed
+        source.removeMessageListener(this);
     }
 }
