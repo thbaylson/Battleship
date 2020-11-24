@@ -25,6 +25,13 @@ public class ConnectionAgent extends MessageSource implements Runnable{
     private PrintStream out;
     private Thread thread;
 
+    /**
+     * This constructors purpose is to create new input, output
+     * streams as well ascall its super constructor to initialize it.
+     * @param SSocket: The socket we wish to get input and output streams
+     * for
+     * @throws IOException: IOException thrown at runtime
+     */
     public ConnectionAgent(Socket socket) throws IOException {
         super();
         this.socket = socket;
@@ -32,17 +39,27 @@ public class ConnectionAgent extends MessageSource implements Runnable{
         this.out = new PrintStream(socket.getOutputStream());
     }
 
+    /**
+     * The purpose of this function is sending a message to the 
+     * PrintStream of the socket.
+     * @param String: Message being sent
+     */
     public void sendMessage(String msg){
         this.out.println(msg);
     }
 
+    /**
+     * This function checks if the socket is still connected
+     * @return boolean: True or false if socket is connected
+     */
     public boolean isConnected(){
         return socket.isConnected();
     }
 
     /**
-     * @throws IOException
-     * 
+     * The purpose of this function is to do final cleanup when closing a
+     * connectionAgent
+     * @throws IOException: IOException thrown during runtime
      */
     public void close() throws IOException {
         //Close itself and the socket
@@ -58,7 +75,7 @@ public class ConnectionAgent extends MessageSource implements Runnable{
         String msg;
         this.thread = this.thread.currentThread();
         while(!this.thread.isInterrupted()){
-            if(this.in.hasNext()){
+            if(this.in.hasNext()){//While theres input
                 msg = this.in.nextLine();
                 notifyReceipt(msg);
             }

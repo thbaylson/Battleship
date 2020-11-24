@@ -186,10 +186,20 @@ public class Grid {
         return false;
     }
 
+    /**
+     * The purpose of this functon is to get the string saying which ship was
+     * sunk
+     * @return String: If any ship was sunk
+     */
     public String getSunk(){
         return this.sunk;
     }
 
+    /**
+     * The purpose of this function is to set the variable for when a ship has
+     * been sunk
+     * @param s: Setting the sunk ship message
+     */
     public void setSunk(String s){
         this.sunk = "";
     }
@@ -205,6 +215,11 @@ public class Grid {
         }
     }
 
+    /**
+     * The purpose of this function is to check if the end conditions have been
+     * met and someone has lost
+     * @return boolean: True or false if someone has lost
+     */
     private boolean checkEndCondition(){
         int sunkenShips = 0;
         for(Ship s : ships){

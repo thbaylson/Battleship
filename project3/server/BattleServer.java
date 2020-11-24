@@ -27,29 +27,54 @@ public class BattleServer implements MessageListener {
     private int activePlayers;
     private boolean playing;
     private int boardSize;
-    private ArrayList<ConnectionAgent> players;
-    private ArrayList<String> playerNames;
-    private ArrayList<Thread> threads;
-    private final String invalidCmd1 = "Valid Commands are: \n\t /join <username>" +
+    private ArrayList<ConnectionAgent> players;//Used to store any CA found
+    private ArrayList<String> playerNames;//Used to store player names when
+                                        //They join
+    private ArrayList<Thread> threads;//Used to relay messages properly
+    private final String invalidCmd1 = "Valid Commands are: \n\t /join "+
+                                "<username>" +
                                 "\n\t /play \n\t /attack <target> <[0-";
     private final String invalidCmd2 = "]>" +
                                 "\n\t /quit <name>\n\t /show <target>\n";
 
+    /**
+     * The purpose of this constructor is to initialize the variables and create
+     * a new server socket from the port.
+     * @param port: Port given from CMA
+     * @param boardSize: BoardSize given from CMA
+     * @throws IOException: Throws IOException during runtime
+     */
     public BattleServer(int port, int boardSize) throws IOException {
+        /**Board size during the game*/
         this.boardSize = boardSize;
+
         this.server = new ServerSocket(port);
+
+        /**Game object */
         this.game = new Game(boardSize);
+
+        /**List of player ConnectionAgents*/
         this.players = new ArrayList<>();
+
+        /**Player Names*/
         this.playerNames = new ArrayList<String>();
+
+        /**Threads of ConnectionAgents*/
         this.threads = new ArrayList<>();
+
+        /**If game is being played*/
         this.playing = false;
+
+        /**Number of current players*/
         this.activePlayers = 0;
     }
 
     /**
-     * Constantly listening
+     * This function is constantly listening for any new connections to the
+     * ServerSocket where it creates a new ConnectionAgent, and adds a 
+     * MessageListener
      * 
-     * @throws IOException
+     * @throws IOException: Throws IOException during runtime
      */
     public void listen() throws IOException {
         Socket socket = this.server.accept();
@@ -62,24 +87,23 @@ public class BattleServer implements MessageListener {
     }
 
     /**
-     * 
-     * @param message
+     * This function sends a message to every ConnectionAgent connected
+     * @param message: Message being sent to everyone
      */
     private void broadcast(String message){
-        message = message + "\n";
+        message = message + "\n";//Adding spacing between messages
         for(ConnectionAgent player : players){
             player.sendMessage(message);
         }
     }
 
-
     /**
      * Broadcasts a message to every connection except the given connection
-     * @param message
-     * @param player
+     * @param message: Message being sent to everyone
+     * @param source: Player that will not receive the message
      */
     private void broadcastExcept(String message, MessageSource source){
-        message = message + "\n";
+        message = message + "\n";//Adding spacing to output
         for(ConnectionAgent player : players){
             if(!player.equals(source)){          
                 player.sendMessage(message);
@@ -87,24 +111,47 @@ public class BattleServer implements MessageListener {
         }
     }
 
+    /**
+     * The purpose of this function is to send a message to one individual
+     * @param message: Message being sent
+     * @param source: Player the message is going to
+     */
     private void sendMessage(String message, MessageSource source){
         for(ConnectionAgent player : players){
             if(player.equals(source)){
-                message = message + "\n";
+                message = message + "\n";//Adding spacing to output
                 player.sendMessage(message);
             }
         }
     }
 
+    /**
+     * The purpose of this function is to see if the server socket has been
+     * closed
+     * @return boolean: True or false if its been closed
+     */
     public boolean isClosed(){
         return server.isClosed();
     }
 
+    /**
+     * Used to notify observers that the subject has received a message.
+     *
+     * @param message The message received by the subject
+     * @param source  The source from which this message originated (if needed).
+     */
     @Override
     public void messageReceived(String message, MessageSource source) {
         handleMessage(message, source);
     }
 
+    /**
+     * The purpose of this function is to properly manage and divide all 
+     * incoming messages to their appropriate functions & also make sure
+     * they are valid commands
+     * @param message: Message from client
+     * @param source: Client the message came from
+     */
     private void handleMessage(String message, MessageSource source){
         String[] cmdList = message.split(" ");
         int size = this.boardSize - 1;
@@ -125,31 +172,48 @@ public class BattleServer implements MessageListener {
                 //ATTACK
                 attackCmd(cmdList, source);
             } else {
-                //SEND BACK USAGE MESSAGE
-                sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2, source);
+                //SEND BACK USAGE MESSAGE, Not proper message
+                sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2,
+                     source);
             }
         } else {
             //Send back usage message
-            sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2, source);
+            sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2,
+                 source);
         }
     }
 
+    /**
+     * The purpose of this function is to handle the commands when it comes
+     * to playing
+     * @param String[]: Split up line for commands
+     * @param MessageSource: The ConnectionAgent the message came from
+     */
     private void playCmd(String[] cmds, MessageSource source){
-        if(!playing){
-            if(cmds[0].toLowerCase().equals("/play")){
-                if(activePlayers >= 2){
-                    broadcast(playerNames.get(getPlayerBySource(source)) + " has started the game!");
+        if(!playing){//If not playing
+            if(cmds[0].toLowerCase().equals("/play")){//make sure command is
+                                                //Play
+                if(activePlayers >= 2){//If there are at least 2 players
+                    broadcast(playerNames.get(getPlayerBySource(source)) +
+                         " has started the game!");
                     broadcast(playerNames.get(0) + " it is your turn!");
                     this.playing = true;
-                } else {
-                    sendMessage("There are not enough players to start the game.", source);
+                } else {//Not enough players
+                    sendMessage("There are not enough players to start the "+
+                        "game.", source);
                 }
             }
-        } else {
+        } else {//trying to play when game has started
             sendMessage("The game has already started.", source);
         }
     }
 
+    /**
+     * The purpose of this function is to handle all commands relating to users
+     * quitting the game.
+     * @param cmds: Commands given by client
+     * @param source: Which client sent the message
+     */
     private void quitCmd(String[] cmds, MessageSource source){
         int size = this.boardSize - 1;
         //We have to do for loop bc we get a ConcurrentModificationException
@@ -157,34 +221,45 @@ public class BattleServer implements MessageListener {
         boolean first = true;
         for(int i = 0; i < playerNames.size(); i++){
             String name = playerNames.get(i);
-            if(cmds.length > 1){
+            if(cmds.length > 1){//Checks it's /quit <name>
                 if(name.equals(cmds[1])){
                     int player = playerNames.indexOf(cmds[1]);
                     broadcast(playerNames.get(player) + " has surrendered!");
-                    removePlayer(player);
+                    removePlayer(player);//removing player information
+                    checkWinConditions();
                 }
             } 
-            if(first){
+            if(first){//If this isn't here it prints the usage message twice
                 if(cmds.length == 1){
                     //Send back usage message
-                    sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2, source);
+                    sendMessage(invalidCmd1 + size + "]> <[0-" + size + 
+                        invalidCmd2, source);
                     first = false;
                 }
             }
         }
     }
 
+    /**
+     * The purpose of this function is to handle all commands relating to users
+     * joining the game.
+     * @param cmds: Commands given by client
+     * @param source: Which client sent the message
+     */
     private void joinCmd(String[] cmds, MessageSource source){
-        if(!playing){
+        if(!playing){//Can't join when playing
             boolean validName = true;
             for(String name : playerNames){
-                if(name.equals(cmds[1])){
+                if(name.equals(cmds[1])){//Makes sure name isn't already used
                     validName = false;
-                    sendMessage("The name " + cmds[1] + " is already in use. Please enter a new name.", source);
-                    sendMessage("1", source);
+                    sendMessage("The name " + cmds[1] + " is already in use. "+
+                        "Please enter a new name.", source);
+                    sendMessage("1", source);//Alerts the client to make username
+                        //Null so they can do /join <name> again
                 }
             }
             if(validName){
+                //If name isn't used it makes a new board and adds the player
                 this.activePlayers++;
                 this.game.addPlayer();
                 this.playerNames.add(cmds[1]);
@@ -193,10 +268,17 @@ public class BattleServer implements MessageListener {
                 broadcastExcept(cmds[1] + " has connected!", source);
             }
         } else { 
-            sendMessage("The game is already in progress. You cannot join.", source);
+            sendMessage("The game is already in progress. You cannot join.",
+                 source);
         }
     }
 
+    /**
+     * The purpose of this function is to handle all commands relating to users
+     * showing boards during the game.
+     * @param cmds: Commands given by client
+     * @param source: Which client sent the message
+     */
     private void showCmd(String[] cmds, MessageSource source){
         boolean validName = false;
         if(cmds.length == 2){
@@ -208,6 +290,8 @@ public class BattleServer implements MessageListener {
             }
 
             if(validName){
+                //Getting if its the person asking for their own or someone
+                //elses board
                 int request = playerNames.indexOf(cmds[1]);
                 int requester = players.indexOf(source);
                 if(request == requester){
@@ -216,19 +300,27 @@ public class BattleServer implements MessageListener {
                     sendMessage(this.game.getInactiveBoard(request), source);
                 }
             } else{
-                sendMessage(cmds[1] + " could not be found. Please retry.", source);
+                //Person requested not found
+                sendMessage(cmds[1] + " could not be found. Please retry.",
+                     source);
             }
         } else {
             sendMessage("Usage: \\show [player_name]", source);
         }    
     }
 
+    /**
+     * The purpose of this function is to handle all commands relating to users
+     * attacking during the game.
+     * @param cmds: Commands given by client
+     * @param source: Which client sent the message
+     */
     private void attackCmd(String[] cmds, MessageSource source){
         boolean validName = false;
         int pos = 0;
         if(cmds.length == 4){
             int i = 0;
-            //Checking first name exists
+            //Checking person being attacked exists
             for(String person : playerNames){
                 if(cmds[1].equals(person)){
                     pos = i;
@@ -249,54 +341,77 @@ public class BattleServer implements MessageListener {
                     int row = Integer.parseInt(cmds[2]);
                     int col = Integer.parseInt(cmds[3]);
                     
-                    boolean validDimensions = Grid.verifyIndex(this.boardSize, row, col);
+                    //Verifying row and col are in boards boundaries
+                    boolean validDimensions =
+                             Grid.verifyIndex(this.boardSize, row, col);
                     
                     //Check if it's the player's turn
                     if(validDimensions){
                         if(requester == (this.game.getTurn() % players.size())){
                             //Prevent players from attacking themselves
                             if(request != requester){
-                                boolean playerDefeated = this.game.attack(request, row, col);
+                                boolean playerDefeated = 
+                                    this.game.attack(request, row, col);
+                                //Send a report back to the person attacking
                                 sendMessage("Attack Report:\n" + 
                                     this.game.getInactiveBoard(request), source);
 
-                                
+                                //Broadcasting that the person attacked someone
                                 broadcastExcept(playerNames.get(requester) +
-                                    " has attacked " + playerNames.get(request) + "!"
+                                    " has attacked " + playerNames.get(request)+
+                                         "!"
                                         , players.get(request));
                                 
+                                //Checking if a ship was sunk
                                 String sunk = this.game.getSunk(request);
-                                if(!sunk.equals("")){
+                                if(!sunk.equals("")){//If there was it prints
+                                    //To everyone
                                     broadcast(playerNames.get(requester) +
-                                        " has sunk " + playerNames.get(request) + "'s " 
-                                        + sunk + "!");
+                                        " has sunk " + playerNames.get(request) +
+                                        "'s " + sunk + "!");
                                         this.game.setSunk(request, "");
                                 }
-
+                                
+                                //Sends message to person who was attacked
+                                //that they were attacked and by who
                                 sendMessage(playerNames.get(requester) + 
                                     " has attacked you!\nAttack Report:\n" +
-                                    this.game.getActiveBoard(request), players.get(request));
+                                    this.game.getActiveBoard(request), 
+                                        players.get(request));
+                        
+                                //If someone has lost
                                 if(playerDefeated){
-                                    broadcast(playerNames.get(request) + " has been defeated!");
+                                    broadcast(playerNames.get(request) + 
+                                        " has been defeated!");
                                     removePlayer(request);
                                 }
+                                //Changes who's turn it is
                                 if(!checkWinConditions()){
-                                    broadcast(playerNames.get((requester + 1) % players.size()) 
+                                    broadcast(playerNames.get((requester + 1) 
+                                        % players.size()) 
                                     + " it is your turn!");
                                 }
                             }
                         }else{
+                            //Trying to attack when its someone elses turn
                             sendMessage("It is currently " + playerNames.get(
-                                this.game.getTurn() % players.size()) + "'s turn.", source);
+                                this.game.getTurn() % players.size()) + 
+                                    "'s turn.", source);
                         }
                     } else{
-                        sendMessage("Usage: //attack [player_name] [row] [column]", source);
+                        //Improper input
+                        sendMessage("Usage: //attack [player_name] [row] "+
+                            "[column]", source);
                     }
                 } catch(NumberFormatException e){
-                    sendMessage("Usage: //attack [player_name] [row] [column]", source);
+                    //Row or col weren't ints
+                    sendMessage("Usage: //attack [player_name] [row] [column]",
+                        source);
                 }
             }else{
-                sendMessage(cmds[1] + " could not be found. Please retry.", source);
+                //Person being attacked doesn't exist
+                sendMessage(cmds[1] + " could not be found. Please retry.", 
+                    source);
             }
         } else {
             sendMessage("Usage: //attack [player_name] [row] [column]", source);
@@ -314,19 +429,24 @@ public class BattleServer implements MessageListener {
             playerNames.remove(player);
             this.game.removePlayerAt(player);
             this.activePlayers--;
-            //TODO: invoke sourceClosed()?
         } catch (IOException e) {
             //Exceptions on this level should be printed to the server
             System.out.println("Error removing player");
         }
     }
 
+    /**
+     * This function is used to check if there is only one person remaining
+     * and tell them they've won
+     * @return boolean: If they've won or not
+     */
     private boolean checkWinConditions(){
         if(playerNames.size() == 1 && playing){
             this.playing = false;
             String player = playerNames.get(0);
-            sendMessage("Congratulations " + player + "!! You Win!!", players.get(0));
-            
+            sendMessage("Congratulations " + player + "!! You Win!!",
+                 players.get(0));
+
             this.game = new Game(boardSize);
             this.game.addPlayer();
             return true;
@@ -336,8 +456,8 @@ public class BattleServer implements MessageListener {
 
     /**
      * Returns the index of the player who has the given source
-     * @param source
-     * @return
+     * @param source: The ConnectionAgent we wish to find the index of
+     * @return int: Position in players
      */
     private int getPlayerBySource(MessageSource source){
         int index = -1;
@@ -349,6 +469,12 @@ public class BattleServer implements MessageListener {
         return index;
     }
 
+    /**
+     * Used to notify observers that the subject will not receive new messages; 
+     * observers can deregister themselves.
+     *
+     * @param source The MessageSource that does not expect more messages.
+     */
     @Override
     public void sourceClosed(MessageSource source) {
         source.removeMessageListener(this);
