@@ -27,7 +27,9 @@ public class BattleServer implements MessageListener {
     private int activePlayers;
     private boolean playing;
     private int boardSize;
-    private int amt;
+    private int oldOffset;
+    private int newOffset;
+    private int currentPlayer;
     private ArrayList<ConnectionAgent> players;//Used to store any CA found
     private ArrayList<String> playerNames;//Used to store player names when
                                         //They join
@@ -68,8 +70,9 @@ public class BattleServer implements MessageListener {
 
         /**Number of current players*/
         this.activePlayers = 0;
-        this.amt = 0;
-
+        this.currentPlayer = 0;
+        this.oldOffset = 0;
+        this.newOffset = 0;
 
     }
 
@@ -340,24 +343,8 @@ public class BattleServer implements MessageListener {
                     sendMessage("Error: Cannot attack yourself.", source);
                 }
                 try{
-                    boolean before = false;
                     int request = playerNames.indexOf(cmds[1]);
                     int requester = players.indexOf(source);
-                    if(requester == 0){
-                        if(request == (playerNames.size() - 1)){
-                            before = true;
-                        } else {
-                            before = false;
-                        }
-
-                    } else {
-                       if(request == (requester - 1)){
-                            before = true;
-                        } else {
-                            before = false;
-                        }
-                    }
-                    
 
                     int row = Integer.parseInt(cmds[2]);
                     int col = Integer.parseInt(cmds[3]);
@@ -368,13 +355,7 @@ public class BattleServer implements MessageListener {
                     
                     //Check if it's the player's turn
                     if(validDimensions){
-                        int val = this.game.getTurn() % players.size();
-                        System.out.println("Amt: " + amt);
-                        System.out.println("Requester: "+ requester);
-                        System.out.println("Size: " + (playerNames.size() - 1));
-                        System.out.println(this.game.getTurn());
-                        
-                        if(requester == amt){
+                        if(requester == currentPlayer){
                             //Prevent players from attacking themselves
                             if(request != requester){
                                 boolean playerDefeated = 
@@ -410,36 +391,22 @@ public class BattleServer implements MessageListener {
                                 if(playerDefeated){
                                     broadcast(playerNames.get(request) + 
                                         " has been defeated!");
+
+                                    this.oldOffset = this.newOffset;
+                                    this.newOffset = (requester - request) % playerNames.size();
                                     removePlayer(request);
-                                } 
+                                }
                                 //Changes who's turn it is
                                 if(!checkWinConditions()){
-                                    int turn = 0;
-                                    if((amt + 1) > (playerNames.size()- 1)){
-                                        turn = 0;
-                                    } else {
-                                        turn = amt + 1;
-                                    }
-                                    broadcast(playerNames.get(turn) 
+                                    this.currentPlayer = ((this.game.getTurn() - (this.newOffset - this.oldOffset)) % playerNames.size());
+                                    broadcast(this.playerNames.get(currentPlayer)
                                     + " it is your turn!");
                                 }
                             }
-                            if((amt + 1) > (playerNames.size()- 1)){
-                                amt = 0;
-                            } else {
-                                amt++;
-                            }
-                            System.out.println("New Amt: "+ amt);
-                            System.out.println("----------------");
                         }else{
                             //Trying to attack when its someone elses turn
-                            int turn = 0;
-                            if((amt + 1) > (playerNames.size()- 1)){
-                                turn = 0;
-                            } else {
-                                turn = amt + 1;
-                            }
-                            sendMessage("It is currently " + playerNames.get(turn) + 
+                            sendMessage("It is currently " + playerNames.get(
+                                this.game.getTurn() % playerNames.size()) + 
                                     "'s turn.", source);
                         }
                     } else{
