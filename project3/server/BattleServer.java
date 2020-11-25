@@ -333,7 +333,7 @@ public class BattleServer implements MessageListener {
                 }
                 i++;
             }
-            
+
             //Check the dimensions
             if(validName){
                 if(players.get(pos).equals(source)){
@@ -343,21 +343,6 @@ public class BattleServer implements MessageListener {
                     boolean before = false;
                     int request = playerNames.indexOf(cmds[1]);
                     int requester = players.indexOf(source);
-                    if(requester == 0){
-                        if(request == (playerNames.size() - 1)){
-                            before = true;
-                        } else {
-                            before = false;
-                        }
-
-                    } else {
-                       if(request == (requester - 1)){
-                            before = true;
-                        } else {
-                            before = false;
-                        }
-                    }
-                    
 
                     int row = Integer.parseInt(cmds[2]);
                     int col = Integer.parseInt(cmds[3]);
@@ -371,6 +356,8 @@ public class BattleServer implements MessageListener {
                         int val = this.game.getTurn() % players.size();
                         System.out.println("Amt: " + amt);
                         System.out.println("Requester: "+ requester);
+                        System.out.println("Request: "+ request);
+                        System.out.println("Before: " + before);
                         System.out.println("Size: " + (playerNames.size() - 1));
                         System.out.println(this.game.getTurn());
                         
@@ -410,35 +397,34 @@ public class BattleServer implements MessageListener {
                                 if(playerDefeated){
                                     broadcast(playerNames.get(request) + 
                                         " has been defeated!");
-                                    removePlayer(request);
+                                     removePlayer(request);
+                                    /**if(this.amt == 0){
+                                        this.amt = playerNames.size() - 1;
+                                    } else {
+                                        this.amt--;
+                                    }*/
+                                    
                                 } 
                                 //Changes who's turn it is
                                 if(!checkWinConditions()){
-                                    int turn = 0;
-                                    if((amt + 1) > (playerNames.size()- 1)){
-                                        turn = 0;
-                                    } else {
-                                        turn = amt + 1;
-                                    }
+                                    int turn = getTurn(request, requester);
+                                    System.out.println("Turn: " + turn);
                                     broadcast(playerNames.get(turn) 
                                     + " it is your turn!");
                                 }
-                            }
-                            if((amt + 1) > (playerNames.size()- 1)){
-                                amt = 0;
-                            } else {
-                                amt++;
                             }
                             System.out.println("New Amt: "+ amt);
                             System.out.println("----------------");
                         }else{
                             //Trying to attack when its someone elses turn
                             int turn = 0;
-                            if((amt + 1) > (playerNames.size()- 1)){
-                                turn = 0;
-                            } else {
-                                turn = amt + 1;
-                            }
+                            //if(before){
+                               // turn = amt;
+                            //} else {
+                                if((amt + 1) > (playerNames.size()- 1)){
+                                    turn = 0;
+                                } 
+                            //}
                             sendMessage("It is currently " + playerNames.get(turn) + 
                                     "'s turn.", source);
                         }
@@ -460,6 +446,48 @@ public class BattleServer implements MessageListener {
         } else {
             sendMessage("Usage: //attack [player_name] [row] [column]", source);
         }
+    }
+
+    public int getTurn(int request, int requester){
+        System.out.println("!!!!!!!!!!!!!!!!!!!!!!");
+        System.out.println(request + " REQUEST INSIDE GET TURN");
+        System.out.println(requester + " REQUESTER INSIDE GET TURN");
+        System.out.println(playerNames.size()-1 + " SIZE INSIDE GET TURN");
+        if(requester == 0 && (request-1) == (playerNames.size()-1)){
+            System.out.println("check");
+                this.amt = 1;
+        } else {
+            System.out.println(amt + " AMT IN GET TURN-----");
+            if(requester == (request - 1)){  
+                System.out.println("Reuqester == reuest - 1");
+                    amt++;
+            
+            
+            } else if(amt + 1> (playerNames.size())){
+                System.out.println(amt + " AMT IN GET TURN!!!!!!");
+                amt = 0;
+            } else if(requester != 0 && request == requester - 1){
+                if(request == 0 && requester == 1){
+                    if(playerNames.size()-1 > requester){
+                        amt++;
+                    }else {
+                //if(requester == (playerNames.size() - 1)){
+                    System.out.println("Reuqester == size - 1");
+                    amt = 0;
+                    }
+                } else {
+                    System.out.println("Else");
+                    amt++;
+                }
+            }else {
+                amt++; 
+            }
+        }
+        if(amt > playerNames.size() - 1){
+            amt = 0;
+        }
+        System.out.println("Inside Get Turn: " + amt);
+        return this.amt;
     }
 
     /**
