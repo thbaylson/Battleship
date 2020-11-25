@@ -6,8 +6,9 @@ Date: 11/24/2020
 
 Purpose:
 ------------------------------------------------------------
-The purpose of this project is to use TCP and threads in order to handle multiple clients playing
-BattleShip. The communicate using connection Agents, PrintStreams, and Sockets.
+The purpose of this project is to use TCP and threads in order to handle 
+multiple clients playing BattleShip. The communicate using connection Agents,
+PrintStreams, and Sockets.
 
 
 How to Compile:
