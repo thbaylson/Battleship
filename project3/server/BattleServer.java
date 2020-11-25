@@ -22,53 +22,63 @@ import common.*;
  */
 public class BattleServer implements MessageListener {
 
+    /**The socket connections will network through */
     private ServerSocket server;
+    
+    /**Game object */
     private Game game;
+    
+    /**Number of current players*/
     private int activePlayers;
+    
+    /**If game is being played*/
     private boolean playing;
+    
+    /**Board size during the game*/
     private int boardSize;
+
+    /**The offset used last turn */
     private int oldOffset;
+
+    /**The new offset calculated when a player leaves */
     private int newOffset;
+
+    /**The index of the player whose turn it is */
     private int currentPlayer;
+
+    /**List of player ConnectionAgents*/
     private ArrayList<ConnectionAgent> players;//Used to store any CA found
+    
+    /**Player Names*/
     private ArrayList<String> playerNames;//Used to store player names when
                                         //They join
-    private ArrayList<Thread> threads;//Used to relay messages properly
+    /**Threads of ConnectionAgents*/
+    private ArrayList<Thread> threads;
+    
+    /**Used to relay commands in play properly */
     private final String invalidCmd1 = "Valid Commands are: \n\t /join "+
                                 "<username>" +
                                 "\n\t /play \n\t /attack <target> <[0-";
+    
+    /**Used to relay commands out of play properly */
     private final String invalidCmd2 = "]>" +
                                 "\n\t /quit <name>\n\t /show <target>\n";
 
     /**
-     * The purpose of this constructor is to initialize the variables and create
+     * The purpose of the constructor is to initialize the variables and create
      * a new server socket from the port.
      * @param port: Port given from CMA
      * @param boardSize: BoardSize given from CMA
      * @throws IOException: Throws IOException during runtime
      */
     public BattleServer(int port, int boardSize) throws IOException {
-        /**Board size during the game*/
         this.boardSize = boardSize;
-
         this.server = new ServerSocket(port);
-
-        /**Game object */
         this.game = new Game(boardSize);
-
-        /**List of player ConnectionAgents*/
         this.players = new ArrayList<>();
-
-        /**Player Names*/
         this.playerNames = new ArrayList<String>();
-
-        /**Threads of ConnectionAgents*/
         this.threads = new ArrayList<>();
-
-        /**If game is being played*/
         this.playing = false;
-
-        /**Number of current players*/
         this.activePlayers = 0;
         this.currentPlayer = 0;
         this.oldOffset = 0;
@@ -145,7 +155,7 @@ public class BattleServer implements MessageListener {
      * Used to notify observers that the subject has received a message.
      *
      * @param message The message received by the subject
-     * @param source  The source from which this message originated (if needed).
+     * @param source  The source from which this message originated (if needed)
      */
     @Override
     public void messageReceived(String message, MessageSource source) {
@@ -180,7 +190,7 @@ public class BattleServer implements MessageListener {
                 attackCmd(cmdList, source);
             } else {
                 //SEND BACK USAGE MESSAGE, Not proper message
-                sendMessage(invalidCmd1 + size + "]> <[0-" + size + invalidCmd2,
+                sendMessage(invalidCmd1 + size + "]> <[0-" + size+ invalidCmd2,
                      source);
             }
         } else {
@@ -262,7 +272,7 @@ public class BattleServer implements MessageListener {
                     validName = false;
                     sendMessage("The name " + cmds[1] + " is already in use. "+
                         "Please enter a new name.", source);
-                    sendMessage("1", source);//Alerts the client to make username
+                    sendMessage("1", source);//Alerts client to make username
                         //Null so they can do /join <name> again
                 }
             }
@@ -360,13 +370,19 @@ public class BattleServer implements MessageListener {
                             if(request != requester){
                                 boolean playerDefeated = 
                                     this.game.attack(request, row, col);
+                                
+                                
+                                this.currentPlayer = ((this.game.getTurn() - (
+                                    this.newOffset - this.oldOffset)) % 
+                                    playerNames.size());
+                                
                                 //Send a report back to the person attacking
                                 sendMessage("Attack Report:\n" + 
                                     this.game.getInactiveBoard(request), source);
 
                                 //Broadcasting that the person attacked someone
                                 broadcastExcept(playerNames.get(requester) +
-                                    " has attacked " + playerNames.get(request)+
+                                    " has attacked " +playerNames.get(request)+
                                          "!"
                                         , players.get(request));
                                 
@@ -375,7 +391,7 @@ public class BattleServer implements MessageListener {
                                 if(!sunk.equals("")){//If there was it prints
                                     //To everyone
                                     broadcast(playerNames.get(requester) +
-                                        " has sunk " + playerNames.get(request) +
+                                        " has sunk " +playerNames.get(request)+
                                         "'s " + sunk + "!");
                                         this.game.setSunk(request, "");
                                 }
@@ -393,13 +409,18 @@ public class BattleServer implements MessageListener {
                                         " has been defeated!");
 
                                     this.oldOffset = this.newOffset;
-                                    this.newOffset = (requester - request) % playerNames.size();
+                                    this.newOffset = (requester - request) % 
+                                        playerNames.size();
                                     removePlayer(request);
                                 }
                                 //Changes who's turn it is
                                 if(!checkWinConditions()){
-                                    this.currentPlayer = ((this.game.getTurn() - (this.newOffset - this.oldOffset)) % playerNames.size());
-                                    broadcast(this.playerNames.get(currentPlayer)
+                                    this.currentPlayer = ((this.game.getTurn() - 
+                                    (this.newOffset - this.oldOffset)) % 
+                                    playerNames.size());
+                                    
+                                    broadcast(this.playerNames.
+                                        get(currentPlayer)
                                     + " it is your turn!");
                                 }
                             }
@@ -425,7 +446,7 @@ public class BattleServer implements MessageListener {
                     source);
             }
         } else {
-            sendMessage("Usage: //attack [player_name] [row] [column]", source);
+            sendMessage("Usage: //attack [player_name] [row] [column]",source);
         }
     }
 
@@ -481,7 +502,7 @@ public class BattleServer implements MessageListener {
     }
 
     /**
-     * Used to notify observers that the subject will not receive new messages; 
+     * Used to notify observers that the subject will not receive new messages
      * observers can deregister themselves.
      *
      * @param source The MessageSource that does not expect more messages.
