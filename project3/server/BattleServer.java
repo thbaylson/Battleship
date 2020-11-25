@@ -201,7 +201,7 @@ public class BattleServer implements MessageListener {
                     broadcast(playerNames.get(getPlayerBySource(source)) +
                          " has started the game!");
                     broadcast(playerNames.get(0) + " it is your turn!");
-                    broadcast("pTurn: " + this.game.getTurn());
+                    //broadcast("pTurn: " + this.game.getTurn());
                     this.playing = true;
                 } else {//Not enough players
                     sendMessage("There are not enough players to start the "+
@@ -340,8 +340,24 @@ public class BattleServer implements MessageListener {
                     sendMessage("Error: Cannot attack yourself.", source);
                 }
                 try{
+                    boolean before = false;
                     int request = playerNames.indexOf(cmds[1]);
                     int requester = players.indexOf(source);
+                    if(requester == 0){
+                        if(request == (playerNames.size() - 1)){
+                            before = true;
+                        } else {
+                            before = false;
+                        }
+
+                    } else {
+                       if(request == (requester - 1)){
+                            before = true;
+                        } else {
+                            before = false;
+                        }
+                    }
+                    
 
                     int row = Integer.parseInt(cmds[2]);
                     int col = Integer.parseInt(cmds[3]);
