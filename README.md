@@ -8,8 +8,8 @@ Date: 11/24/2020
 ## Purpose:
 ------------------------------------------------------------
 The purpose of this project is to use TCP and threads in order to handle 
-multiple clients playing BattleShip. The communicate using connection Agents,
-PrintStreams, and Sockets.
+multiple clients playing BattleShip. They communicate using Sockets, Connection Agents,
+and PrintStreams.
 
 ## How to Compile:
 ------------------------------------------------------------
@@ -25,8 +25,8 @@ java client.BattleDriver <hostname> <port> <name>
 
 ## Bugs:
 ------------------------------------------------------------
-1. When the client does Ctrl-C, it doesn't remove the player information 
-  from the server and continues to wait on their input
-2. When the server does Ctrl-C, the clients don't even quit and just hang
-3. If there are 3 players, if someone beats the person behind them, it gives  
-  that person a second turn
+1. When a client is interrupted, the program does not remove the player information 
+from the server and the server continues to wait on their input.
+2. When the server is interrupted, the clients hang instead of quitting.
+3. If there are 3 players and if a player (Player A) defeats the player who just 
+finished their turn (Player B), the server gives player A a second turn.
