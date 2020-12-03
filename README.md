@@ -1,6 +1,8 @@
 # Battleship
 Author: Tyler Baylson
+
 Author: Dillon Gorlesky
+
 Date: 11/24/2020
 
 ## Purpose:
